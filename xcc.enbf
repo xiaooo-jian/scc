@@ -1,5 +1,5 @@
 Expression  => EqualExpr
-EqualExpr    => EqualExpr  (== !=) AddMinsExpr 
+EqualExpr    => AddMinsExpr (== !=) EqualExpr
 AddMinsExpr => MulDivExpr (+ -) AddMinsExpr
 MulDivExpr  => Primary  (* /) MulDivExpr
 Primary     => Num | '(' Expression ')'

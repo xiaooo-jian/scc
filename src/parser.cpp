@@ -11,9 +11,22 @@ bool Parser::match(TokenType type)
 
 AST_node *Parser::parserExpression()
 {
-    AST_node *node = parserAddMinsExpr();
+    AST_node *node = parserEqualExpr();
     return node;
 };
+
+
+AST_node* Parser::parserEqualExpr(){
+    LOG("EqualExpr\n");
+    AST_node *node = new AST_node;
+    node->left =  parserAddMinsExpr();
+    if(match(Tok_eq) || match(Tok_neq)){
+        node->type = match(Tok_eq) ? AST_Eq : AST_Neq;
+        cur++;
+        node->right = parserEqualExpr();
+    }
+    return node;
+}
 
 AST_node *Parser::parserAddMinsExpr()
 {
@@ -65,7 +78,8 @@ AST_node *Parser::parserPrimary()
     else
     {
         // TODO: error
-        ERROR("parser error for get %d",tokens[cur]);
+        // ERROR("parser error for get %s",tokens[cur].value);
+        ERROR("parser error for get");
         exit(1);
     }
     return node;

@@ -13,12 +13,14 @@ enum TokenType{
     Tok_num, 
     Tok_iden,   //
     Tok_plus,   // +
-    Tok_minus,    // -
-    Tok_mul,  // *
+    Tok_minus,  // -
+    Tok_mul,    // *
     Tok_div,    // /
     Tok_lbak,   // (
     Tok_rbak,   // )
-
+    Tok_eq,     // ==
+    Tok_neq,    // !=
+    Tok_
 };
 
 struct Token{
@@ -48,7 +50,9 @@ enum AST_type{
     AST_Divide,
     AST_Mins,
     AST_Add,
-    AST_Num
+    AST_Num,
+    AST_Eq,
+    AST_Neq,
 };
 
 struct AST_node{

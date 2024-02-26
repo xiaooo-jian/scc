@@ -52,6 +52,18 @@ void Tokenizer::tokenize(string src){
                 token_add(Tok_rbak,")",line,col);
                 cur++;
                 break;
+            case '=':
+                if(src[cur + 1] == '='){
+                    token_add(Tok_eq,"==",line,col);
+                    cur += 2;
+                }
+                break;
+            case '!':
+                if(src[cur + 1] == '='){
+                    token_add(Tok_neq,"!=",line,col);
+                    cur += 2;
+                }
+                break;
             default:
                 if(is_num(src[cur])){
                     int num = 0;

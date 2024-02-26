@@ -70,17 +70,28 @@ void Codegen::codegenExpr(AST_node *node)
     switch (node->type)
     {
     case AST_Add:
-        outFile << "\tadd\t%rdi, %rax\n";
+        outFile << "\tadd %rdi, %rax\n";
         break;
     case AST_Mins:
-        outFile << "\tsub\t%rdi, %rax\n";
+        outFile << "\tsub %rdi, %rax\n";
         break;
     case AST_Multiply:
-        outFile << "\timul\t%rdi, %rax\n";
+        outFile << "\timul %rdi, %rax\n";
         break;
     case AST_Divide:
         outFile << "\tcqo\n"
-                << "\tidiv\t%rdi\n";
+                << "\tidiv %rdi\n";
+        break;
+
+    case AST_Eq:
+        outFile << "\tcmp %rdi, %rax\n";
+        outFile << "\tsete %al\n";
+        outFile << "\tmovzb %al, %rax\n";
+        break;
+    case AST_Neq:
+        outFile << "\tcmp %rdi, %rax\n";
+        outFile << "\tsetne %al\n";
+        outFile << "\tmovzb %al, %rax\n";
         break;
     case AST_None:
         break;
