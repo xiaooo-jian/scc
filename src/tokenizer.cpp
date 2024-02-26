@@ -20,6 +20,9 @@ void Tokenizer::tokenize(string src){
     while(cur < size){
         pre = cur;
         switch(src[cur]){
+            case ' ':
+                cur++;
+                break;
             case '\n':
                 line++;
                 col = 0;
@@ -41,6 +44,14 @@ void Tokenizer::tokenize(string src){
                 token_add(Tok_div,"/",line,col);
                 cur ++;
                 break;
+            case '(':
+                token_add(Tok_lbak,"(",line,col);
+                cur++;
+                break;
+            case ')':
+                token_add(Tok_rbak,")",line,col);
+                cur++;
+                break;
             default:
                 if(is_num(src[cur])){
                     int num = 0;
@@ -49,8 +60,9 @@ void Tokenizer::tokenize(string src){
                         cur++;
                     }
                     token_add(Tok_num,to_string(num),line,col);
+                    break;
                 }
-
+                ERROR("Invalid character: %c" , src[cur]);
         }
         
         col += cur - pre;

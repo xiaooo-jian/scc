@@ -55,10 +55,17 @@ AST_node *Parser::parserPrimary()
         node->val = atoi(tokens[cur].value.c_str());
         cur++;
     }
+    else if(match(Tok_lbak)){
+        cur ++;
+        node = parserExpression();
+        if(match(Tok_rbak)){
+            cur++;
+        }
+    }
     else
     {
         // TODO: error
-        LOG("error in primary");
+        ERROR("parser error for get %d",tokens[cur]);
         exit(1);
     }
     return node;

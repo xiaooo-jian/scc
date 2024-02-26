@@ -4,6 +4,10 @@
 
 
 void Xcc::load(string file_name){
+    if(file_name != "./test/print"){
+        src = file_name;
+        return;
+    }
     ifstream fin;
     fin.open(file_name, ios::in);
     if (!fin.is_open())
