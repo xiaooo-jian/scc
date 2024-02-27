@@ -19,6 +19,7 @@ public:
 
     AST_node* root;
     AST_node* parserEqualExpr();
+    AST_node* parserCompareExpr();
     AST_node* parserExpression();
     AST_node* parserAddMinsExpr();
     AST_node* parserMulDivExpr();

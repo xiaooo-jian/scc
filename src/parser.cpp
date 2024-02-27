@@ -19,11 +19,23 @@ AST_node *Parser::parserExpression()
 AST_node* Parser::parserEqualExpr(){
     LOG("EqualExpr\n");
     AST_node *node = new AST_node;
-    node->left =  parserAddMinsExpr();
+    node->left =  parserCompareExpr();
     if(match(Tok_eq) || match(Tok_neq)){
         node->type = match(Tok_eq) ? AST_Eq : AST_Neq;
         cur++;
         node->right = parserEqualExpr();
+    }
+    return node;
+}
+
+AST_node* Parser::parserCompareExpr(){
+    LOG("CompareExpr\n");
+    AST_node *node = new AST_node;
+    node->left =  parserAddMinsExpr();
+    if(match(Tok_leq) || match(Tok_req) || match(Tok_lt) || match(Tok_rt)){
+        node->type = match(Tok_leq) ? AST_leq : match(Tok_req) ? AST_req:  match(Tok_lt) ? AST_lt:AST_rt;
+        cur++;
+        node->right = parserCompareExpr();
     }
     return node;
 }

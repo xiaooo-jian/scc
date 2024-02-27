@@ -93,6 +93,27 @@ void Codegen::codegenExpr(AST_node *node)
         outFile << "\tsetne %al\n";
         outFile << "\tmovzb %al, %rax\n";
         break;
+    case AST_leq:
+        outFile << "\tcmp %rdi, %rax\n";
+        outFile << "\tsetle %al\n";
+        outFile << "\tmovzb %al, %rax\n";
+        break;
+    case AST_req:
+            outFile << "\tcmp %rax,%rdi\n";
+        outFile << "\tsetle %al\n";
+        outFile << "\tmovzb %al, %rax\n";
+        break;
+    case AST_lt:
+        outFile << "\tcmp %rdi, %rax\n";
+        outFile << "\tsetl %al\n";
+        outFile << "\tmovzb %al, %rax\n";
+        break;
+    case AST_rt:
+        outFile << "\tcmp %rax,%rdi\n";
+        outFile << "\tsetl %al\n";
+        outFile << "\tmovzb %al, %rax\n";
+        break;
+
     case AST_None:
         break;
     default:

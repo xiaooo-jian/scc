@@ -64,6 +64,24 @@ void Tokenizer::tokenize(string src){
                     cur += 2;
                 }
                 break;
+            case '>':
+                if(src[cur + 1] == '='){
+                    token_add(Tok_req,">=",line,col);
+                    cur += 2;
+                }else{
+                    token_add(Tok_rt,">",line,col);
+                    cur ++;
+                }
+                break;
+            case '<':
+                if(src[cur + 1] == '='){
+                    token_add(Tok_leq,"<=",line,col);
+                    cur += 2;
+                }else{
+                    token_add(Tok_lt,"<",line,col);
+                    cur ++;
+                }
+                break;
             default:
                 if(is_num(src[cur])){
                     int num = 0;

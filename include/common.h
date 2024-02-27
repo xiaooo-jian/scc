@@ -20,7 +20,10 @@ enum TokenType{
     Tok_rbak,   // )
     Tok_eq,     // ==
     Tok_neq,    // !=
-    Tok_
+    Tok_leq,     // >
+    Tok_req,     // <
+    Tok_lt,     // >=
+    Tok_rt,     // <=
 };
 
 struct Token{
@@ -53,6 +56,10 @@ enum AST_type{
     AST_Num,
     AST_Eq,
     AST_Neq,
+    AST_leq,     // >
+    AST_req,     // <
+    AST_lt,     // >=
+    AST_rt,     // <=
 };
 
 struct AST_node{
