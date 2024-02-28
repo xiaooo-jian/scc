@@ -58,7 +58,7 @@ AST_node *Parser::parserMulDivExpr()
 {
     LOG("MulDivExpr\n");
     AST_node *node = new AST_node;
-    node->left = parserPrimary();
+    node->left = parserUnaryExpr();
     if (match(Tok_mul) || match(Tok_div))
     {
         node->type = match(Tok_mul) ? AST_Multiply : AST_Divide;
@@ -67,6 +67,24 @@ AST_node *Parser::parserMulDivExpr()
     }
     return node;
 }
+
+AST_node* Parser::parserUnaryExpr(){
+    LOG("Unary\n");
+    
+    int op = 1;
+    while(match(Tok_minus) || match(Tok_plus)){
+        if(match(Tok_minus)){
+            op *= -1;
+            cur++;
+        }else if(match(Tok_plus)){
+            cur++;
+        }
+    }
+    AST_node *node = parserPrimary();
+    node->val = op * node->val;
+    return node;
+}
+
 
 AST_node *Parser::parserPrimary()
 {
@@ -91,8 +109,10 @@ AST_node *Parser::parserPrimary()
     {
         // TODO: error
         // ERROR("parser error for get %s",tokens[cur].value);
-        ERROR("parser error for get");
-        exit(1);
+        // cout << "1231231" << endl;
+        // cout << tokens[cur].type <<endl;
+        ERROR("parser error for get\n");
+
     }
     return node;
 }

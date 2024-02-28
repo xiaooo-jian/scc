@@ -99,7 +99,7 @@ void Codegen::codegenExpr(AST_node *node)
         outFile << "\tmovzb %al, %rax\n";
         break;
     case AST_req:
-            outFile << "\tcmp %rax,%rdi\n";
+        outFile << "\tcmp %rax,%rdi\n";
         outFile << "\tsetle %al\n";
         outFile << "\tmovzb %al, %rax\n";
         break;

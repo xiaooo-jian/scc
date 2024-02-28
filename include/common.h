@@ -67,7 +67,9 @@ struct AST_node{
     AST_node* right;
     int val;
     AST_type type;
-    AST_node(){};
+    AST_node(){
+
+    };
 };
 
 
