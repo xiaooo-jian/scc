@@ -44,9 +44,17 @@ void Codegen::pop(string arg)
     outFile << "\tpop\t" << arg << endl;
 }
 
+void Codegen::codegenStmt(){
+    for(auto root: roots){
+        
+        // if(root->type == AST_Expr){
+        codegenExpr(root);
+        // }       
+    }
+}
+
 void Codegen::codegenExpr(AST_node *node)
 {
-
     if (node->type == AST_Num)
     {
         outFile << "\tmov\t$" << node->val << ", \t%rax\n";
@@ -56,13 +64,13 @@ void Codegen::codegenExpr(AST_node *node)
     if (node->right != NULL)
     {
         codegenExpr(node->right);
-        if(node->type != AST_None)
+        if(node->type != AST_None )
             push();
     }
     if (node->left != NULL)
     {
         codegenExpr(node->left);
-        if(node->type != AST_None)
+        if(node->type != AST_None )
             pop("%rdi");
     }
 
@@ -115,9 +123,11 @@ void Codegen::codegenExpr(AST_node *node)
         break;
 
     case AST_None:
+    case AST_Expr:
         break;
     default:
-        cout << "error in codegenexpr\n";
+        ERROR("except %d\n",node->type);
+        // cout << "error in codegenexpr\n";
     }
 }
 
@@ -131,6 +141,6 @@ void Codegen::codegen(string filename)
     }
 
     codegen_init();
-    codegenExpr(root);
+    codegenStmt();
     codegen_end();
 }

@@ -27,6 +27,7 @@ void Xcc::load(string file_name){
 }
 
 void Xcc::compile(){
+                   
     Tokenizer tokenizer;
     tokenizer.tokenize(src);
     
@@ -36,9 +37,9 @@ void Xcc::compile(){
     parser.tokens = vector<Token>(tokenizer.tokens);
     // cout << "parser !"  << parser.tokens.size() << endl;
     parser.parse();
-    // parser.parserDisplay(parser.root);
+    // parser.parserDisplay(parser.roots[0]);
 
     Codegen codegen;
-    codegen.root = parser.root;
+    codegen.roots = vector<AST_node*>(parser.roots); 
     codegen.codegen("test.s");
 }

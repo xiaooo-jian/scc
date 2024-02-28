@@ -1,6 +1,9 @@
+
+Stmt        => ExprStmt ';'
+ExprStmt    => Expression 
 Expression  => EqualExpr
-EqualExpr    => CompareExpr (== !=) EqualExpr
-CompareExpr  => AddMinsExpr (> < >= <=) CompareExpr
+EqualExpr   => CompareExpr (== !=) EqualExpr
+CompareExpr => AddMinsExpr (> < >= <=) CompareExpr
 AddMinsExpr => MulDivExpr (+ -) AddMinsExpr
 MulDivExpr  => Primary  (* /) Unary
 Unary       => (- +)? Primary

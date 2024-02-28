@@ -24,6 +24,9 @@ enum TokenType{
     Tok_req,     // <
     Tok_lt,     // >=
     Tok_rt,     // <=
+    Tok_seg,    // ;
+
+    Tok_eof
 };
 
 struct Token{
@@ -60,6 +63,9 @@ enum AST_type{
     AST_req,     // <
     AST_lt,     // >=
     AST_rt,     // <=
+
+
+    AST_Expr,
 };
 
 struct AST_node{
@@ -67,9 +73,19 @@ struct AST_node{
     AST_node* right;
     int val;
     AST_type type;
+    AST_node(const AST_node& node){
+        this->left = node.left;
+        this->right = node.right;
+        this->val = node.val;
+        this->type = node.type;
+    };
     AST_node(){
 
-    };
+    }
+    ~AST_node(){
+        delete left;
+        delete right;
+    }
 };
 
 

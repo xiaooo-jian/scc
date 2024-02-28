@@ -28,6 +28,10 @@ void Tokenizer::tokenize(string src){
                 col = 0;
                 cur ++;
                 break;
+            case ';':
+                token_add(Tok_seg,";",line,col);
+                cur++;
+                break;
             case '+':
                 token_add(Tok_plus,"+",line,col); // 以后需要对token存取的东西进行扩充，还需要保存token的位置
                 cur ++;
@@ -97,6 +101,7 @@ void Tokenizer::tokenize(string src){
         
         col += cur - pre;
     }
+    token_add(Tok_eof,"",line,col);
 }
 
 

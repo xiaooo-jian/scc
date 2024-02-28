@@ -2,18 +2,18 @@
 
 class Codegen{
 public:
-    AST_node* root;
+    vector<AST_node*> roots;
 
     ofstream outFile;
 
     void codegen(string filename);
-
+    
     void codegenPrimary(AST_node* node);
     void codegenAddMinsExpr(AST_node* node);
     void codegenMultDivExpr(AST_node* node);
     void codegenExpression(AST_node* node);
 
-
+    void codegenStmt();
     void codegenExpr(AST_node * node);
 
     void load(int value);   

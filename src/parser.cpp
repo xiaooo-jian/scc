@@ -9,6 +9,34 @@ bool Parser::match(TokenType type)
     return false;
 }
 
+void Parser::skip(TokenType type){
+    if (tokens[cur].type == type)
+    {
+        cur++;
+        return ;
+    }
+    ERROR("Expect %d but get %d", type,tokens[cur].type);
+
+}
+
+void Parser::parserStmt(){
+
+    AST_node *node = parserExprStmt();
+
+    // node->type = AST_Expr;
+
+    roots.push_back(node);           
+    skip(Tok_seg);
+    return ;
+}
+
+AST_node* Parser::parserExprStmt(){
+    
+    AST_node *node = parserExpression();
+    return node;
+}
+
+
 AST_node *Parser::parserExpression()
 {
     AST_node *node = parserEqualExpr();
@@ -87,7 +115,7 @@ AST_node* Parser::parserUnaryExpr(){
 
 
 AST_node *Parser::parserPrimary()
-{
+{    
     LOG("primary\n");
     // cout << tokens[cur].value << endl;
     AST_node *node = new AST_node;
@@ -110,8 +138,8 @@ AST_node *Parser::parserPrimary()
         // TODO: error
         // ERROR("parser error for get %s",tokens[cur].value);
         // cout << "1231231" << endl;
-        // cout << tokens[cur].type <<endl;
-        ERROR("parser error for get\n");
+        cout << tokens[cur].type <<endl;
+        ERROR("parser error for get [%s] \n",tokens[cur].value.c_str());
 
     }
     return node;
@@ -121,7 +149,9 @@ AST_node *Parser::parserPrimary()
 void Parser::parse()
 {
     cur = 0;
-    root = parserExpression();
+    while(tokens[cur].type != Tok_eof){
+        parserStmt();
+    }
 }
 
 void Parser::parserDisplay(AST_node *node){
