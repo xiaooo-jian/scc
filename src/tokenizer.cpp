@@ -12,6 +12,13 @@ bool Tokenizer::is_num(char c){
     return false;
 }
 
+bool Tokenizer::is_alpha(char c){
+    return isalpha(c);
+}
+bool Tokenizer::is_alphanum(char c){
+    return is_alpha(c) || is_num(c) || c=='_';
+}
+
 void Tokenizer::tokenize(string src){
     int cur = 0 ,pre;
     int line = 0;
@@ -60,6 +67,9 @@ void Tokenizer::tokenize(string src){
                 if(src[cur + 1] == '='){
                     token_add(Tok_eq,"==",line,col);
                     cur += 2;
+                }else{
+                    token_add(Tok_assign,"=",line,col);
+                    cur ++;
                 }
                 break;
             case '!':
@@ -94,6 +104,15 @@ void Tokenizer::tokenize(string src){
                         cur++;
                     }
                     token_add(Tok_num,to_string(num),line,col);
+                    break;
+                }
+                if(is_alpha(src[cur])){
+                    string name = string(1,src[cur++]);
+                    while(cur < size && is_alphanum(src[cur])){
+                        name += src[cur];
+                        cur++;
+                    }
+                    token_add(Tok_ident,name,line,col);
                     break;
                 }
                 ERROR("Invalid character: %c" , src[cur]);

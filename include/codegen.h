@@ -1,10 +1,15 @@
 #include <common.h>
+#include <symtable.h>
 
 class Codegen{
 public:
-    vector<AST_node*> roots;
+    int depth=0;
+    Function* func;
 
     ofstream outFile;
+    int align(int n, int align);
+    void iden_offset();
+
 
     void codegen(string filename);
     

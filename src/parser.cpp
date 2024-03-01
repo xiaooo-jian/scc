@@ -1,5 +1,5 @@
 #include <parser.h>
-
+#include <symtable.h>
 bool Parser::match(TokenType type)
 {
     if (tokens[cur].type == type)
@@ -19,26 +19,56 @@ void Parser::skip(TokenType type){
 
 }
 
-void Parser::parserStmt(){
 
-    AST_node *node = parserExprStmt();
+SymTable *cur_table ;
 
-    // node->type = AST_Expr;
+Function* Parser::parserFunction(){
+    Function *func = new Function();
+    cur_table = (SymTable*)&(func->sym_table);
+    func->stmts = parserStmt();
+    return func;
+}
 
-    roots.push_back(node);           
-    skip(Tok_seg);
-    return ;
+vector<AST_node*> Parser::parserStmt(){
+    
+    vector<AST_node*> roots;
+    while(tokens[cur].type != Tok_eof){
+        AST_node *node = parserExprStmt();
+        // node->type = AST_Expr;
+        roots.push_back(node);           
+        skip(Tok_seg);
+    }
+    return roots;
 }
 
 AST_node* Parser::parserExprStmt(){
+    LOG("ExprStmt\n");
+    AST_node *node = new AST_node;
+    if(match(Tok_ident) && tokens[cur+1].type == Tok_assign){
+        if(!cur_table->add(TY_int,tokens[cur].value)){
+            ERROR("Redefined variable %s",tokens[cur].value.c_str());
+        }
+        node->name = tokens[cur].value;
+        node->type = AST_Assign;
+        cur++;
+        skip(Tok_assign);
+        node->right = parserExpression();
+        
+        
+        // if (!cur_table->add(TY_int,node->name,parserExpression()->val)){
+        //     ERROR("Redefined variable %s",node->name.c_str());
+        // }
+    }else{
+        node = parserExpression();
+    }
     
-    AST_node *node = parserExpression();
     return node;
 }
 
 
 AST_node *Parser::parserExpression()
 {
+    LOG("Expression\n");
     AST_node *node = parserEqualExpr();
     return node;
 };
@@ -133,11 +163,16 @@ AST_node *Parser::parserPrimary()
             cur++;
         }
     }
-    else
+    else if(match(Tok_ident)){
+        node->name = tokens[cur].value;
+        node->type = AST_val;
+        if(!cur_table->get(node->name,node->val)){
+            ERROR("variable [%s] not defined \n",node->name.c_str());
+        }
+        cur ++;
+    }
+    else 
     {
-        // TODO: error
-        // ERROR("parser error for get %s",tokens[cur].value);
-        // cout << "1231231" << endl;
         cout << tokens[cur].type <<endl;
         ERROR("parser error for get [%s] \n",tokens[cur].value.c_str());
 
@@ -146,12 +181,12 @@ AST_node *Parser::parserPrimary()
 }
 
 
-void Parser::parse()
+Function* Parser::parse()
 {
     cur = 0;
-    while(tokens[cur].type != Tok_eof){
-        parserStmt();
-    }
+
+    return parserFunction();
+
 }
 
 void Parser::parserDisplay(AST_node *node){

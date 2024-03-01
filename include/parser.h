@@ -1,5 +1,5 @@
 #include <common.h>
-
+#include <symtable.h>
 
 
 class Parser
@@ -14,12 +14,11 @@ public:
 
     int cur;
 
-    void parse();
+    Function* parse();
     // void parse();
 
-    vector<AST_node*> roots;
-
-    void parserStmt();
+    Function* parserFunction();
+    vector<AST_node*> parserStmt();
 
     AST_node* parserExprStmt();
 

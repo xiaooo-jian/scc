@@ -32,14 +32,17 @@ void Xcc::compile(){
     tokenizer.tokenize(src);
     
     tokenizer.token_display();
+    // cout << "tokenizer success !" << endl;
 
     Parser parser;
     parser.tokens = vector<Token>(tokenizer.tokens);
     // cout << "parser !"  << parser.tokens.size() << endl;
-    parser.parse();
-    // parser.parserDisplay(parser.roots[0]);
-
+    Function* func = parser.parse();
+    // parser.parserDisplay(func->stmts[0]);
+    // cout << "parser success !" << endl;
     Codegen codegen;
-    codegen.roots = vector<AST_node*>(parser.roots); 
+    codegen.func = func; 
     codegen.codegen("test.s");
+
+    // cout << "codegen success !" << endl;
 }

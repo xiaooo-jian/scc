@@ -4,65 +4,111 @@
 
 // }
 
+// 偏移量计算怎么感觉可以放到语法分析一次性做完
+int Codegen::align(int n, int align) {
+  return (n + align - 1) / align * align;
+}
+
+void Codegen::iden_offset(){
+    int offset = 0;
+    for(auto& val : func->sym_table.table){
+        offset += 8;
+        val.second.offset = -offset;
+    }
+    func->stack_size = align(offset, 16);
+}
+
+
+void Codegen::codegen(string filename)
+{
+    outFile.open(filename);
+    if (!outFile.is_open())
+    {
+        cout << "Create the assembly file error!" << endl;
+        return;
+    }
+
+    iden_offset();
+
+    codegen_init();
+    codegenStmt();
+    codegen_end();
+
+    assert(depth == 0);
+    outFile.close();
+}
+
 void Codegen::codegen_init()
 {
     outFile << "\t.globl main\n";
     outFile << "main:\n";
+    // stack
+    outFile << "\tpush %rbp\n";
+    outFile << "\tmov %rsp, %rbp\n";
+    outFile << "\tsub $" << func->stack_size << ", %rsp\n";
+
 }
 
 void Codegen::codegen_end()
 {
+    outFile << "\tmov %rbp, %rsp\n";
+    outFile << "\tpop %rbp\n";
     outFile << "\tret\n";
 }
 
 void Codegen::load(int value)
 {
-    outFile << "\tmov\trax, " << value << endl;
+    outFile << "\tmov rax, " << value << endl;
 }
 
 void Codegen::add(int r1)
 {
-    outFile << "\tadd\trax, " << r1 << endl;
+    outFile << "\tadd rax, " << r1 << endl;
 }
 
-// void Codegen::codegenExpression(AST_node * node){
-//     codegenAddMinsExpr(node->left);
-// }
-
-// void Codegen::codegenAddMinsExpr(AST_node * node){
-// int val1;
-// val1 = codege
-// }
 
 void Codegen::push()
 {
-    outFile << "\tpush\t%rax" << endl;
+    outFile << "\tpush %rax" << endl;
+    depth++;
 }
 
 void Codegen::pop(string arg)
 {
     outFile << "\tpop\t" << arg << endl;
+    depth--;
 }
 
 void Codegen::codegenStmt(){
-    for(auto root: roots){
-        
-        // if(root->type == AST_Expr){
+    for(auto root: func->stmts){
         codegenExpr(root);
-        // }       
     }
 }
 
 void Codegen::codegenExpr(AST_node *node)
 {
-    if (node->type == AST_Num)
+    switch (node->type)
     {
-        outFile << "\tmov\t$" << node->val << ", \t%rax\n";
+    case AST_Num:
+        outFile << "\tmov $" << node->val << ", %rax\n";
         return;
+    case AST_val:
+        outFile << "\tlea " << func->get_offset(node->name) << "(%rbp), %rax\n";
+        outFile << "\tmov (%rax), %rax\n";
+        return;
+    case AST_Assign:
+        outFile << "\tlea " << func->get_offset(node->name) << "(%rbp), %rax\n";
+        push();
+        codegenExpr(node->right);
+        pop("%rdi");
+        outFile << "\tmov %rax, (%rdi)\n";
+        return;
+    default:
+        LOG("nothing...");
     }
-
+    
     if (node->right != NULL)
-    {
+    { 
         codegenExpr(node->right);
         if(node->type != AST_None )
             push();
@@ -121,7 +167,6 @@ void Codegen::codegenExpr(AST_node *node)
         outFile << "\tsetl %al\n";
         outFile << "\tmovzb %al, %rax\n";
         break;
-
     case AST_None:
     case AST_Expr:
         break;
@@ -131,16 +176,3 @@ void Codegen::codegenExpr(AST_node *node)
     }
 }
 
-void Codegen::codegen(string filename)
-{
-    outFile.open(filename);
-    if (!outFile.is_open())
-    {
-        cout << "Create the assembly file error!" << endl;
-        return;
-    }
-
-    codegen_init();
-    codegenStmt();
-    codegen_end();
-}

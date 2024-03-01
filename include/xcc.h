@@ -2,6 +2,9 @@
 #include <tokenizer.h>
 #include <parser.h>
 #include <codegen.h>
+#include <symtable.h>
+
+
 class Xcc{
 public:
     Xcc(){};

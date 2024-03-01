@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 #include <stdarg.h>
+#include <assert.h>
+#include <unordered_map>
 using namespace std;
 
 
@@ -11,7 +13,7 @@ using namespace std;
 
 enum TokenType{
     Tok_num, 
-    Tok_iden,   //
+    Tok_ident,   //
     Tok_plus,   // +
     Tok_minus,  // -
     Tok_mul,    // *
@@ -25,7 +27,7 @@ enum TokenType{
     Tok_lt,     // >=
     Tok_rt,     // <=
     Tok_seg,    // ;
-
+    Tok_assign, // =
     Tok_eof
 };
 
@@ -63,8 +65,8 @@ enum AST_type{
     AST_req,     // <
     AST_lt,     // >=
     AST_rt,     // <=
-
-
+    AST_Assign, // =
+    AST_val,    //变量
     AST_Expr,
 };
 
@@ -72,22 +74,34 @@ struct AST_node{
     AST_node* left;
     AST_node* right;
     int val;
+    string name;
     AST_type type;
     AST_node(const AST_node& node){
         this->left = node.left;
         this->right = node.right;
         this->val = node.val;
         this->type = node.type;
+        this->name = node.name;
     };
     AST_node(){
 
     }
-    ~AST_node(){
-        delete left;
-        delete right;
-    }
+    // ~AST_node(){
+    //     delete left;
+    //     delete right;
+    // }
 };
 
+
+
+
+enum Type
+{
+    TY_void,
+    TY_char,
+    TY_int,
+    TY_point
+};
 
 
 // #define __DEBUG

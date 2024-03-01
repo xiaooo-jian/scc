@@ -11,7 +11,7 @@ EXTENSION=cpp
 CC=g++
 DEBUG=-DUSE_DEBUG
 CFLAGS=-Wall -W 
-LDFLAGS=
+LDFLAGS= 
 INCLUDE=-I$(INC_DIR)
 TARGET=xcc
 
@@ -19,11 +19,11 @@ TARGET=xcc
 
 
 all:$(OBJS)
-	$(CC) -o $(OBJ_DIR)/$(TARGET) $(OBJS) $(LDFLAGS)
+	$(CC) -o $(OBJ_DIR)/$(TARGET) $(OBJS) $(LDFLAGS) -g
 
 
 $(OBJ_DIR)/%.o:$(SRC_DIR)/%.$(EXTENSION) 
-	$(CC) $< -o $@ -c $(CFLAGS) $(INCLUDE)
+	$(CC) $< -o $@ -c $(CFLAGS) $(INCLUDE) -g
 
 run: 
 	@./build/xcc ./test/print
