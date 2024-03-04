@@ -5,6 +5,10 @@ void Tokenizer::token_add(TokenType tok,string val,int line,int col){
     tokens.push_back(Token(tok,val,line,col));
 }
 
+void Tokenizer::keywords_init(){
+    keywords = {{"return",Tok_return}};
+}
+
 bool Tokenizer::is_num(char c){
     if(c >= '0' && c <= '9'){
         return true;
@@ -18,8 +22,16 @@ bool Tokenizer::is_alpha(char c){
 bool Tokenizer::is_alphanum(char c){
     return is_alpha(c) || is_num(c) || c=='_';
 }
+bool Tokenizer::is_keyword(string str){
+    if(keywords.find(str) != keywords.end()){
+        return true;
+    }
+    return false;
+}
+
 
 void Tokenizer::tokenize(string src){
+    keywords_init();
     int cur = 0 ,pre;
     int line = 0;
     int col;
@@ -97,6 +109,7 @@ void Tokenizer::tokenize(string src){
                 }
                 break;
             default:
+
                 if(is_num(src[cur])){
                     int num = 0;
                     while(cur < size && is_num(src[cur])){
@@ -106,13 +119,17 @@ void Tokenizer::tokenize(string src){
                     token_add(Tok_num,to_string(num),line,col);
                     break;
                 }
+
                 if(is_alpha(src[cur])){
                     string name = string(1,src[cur++]);
                     while(cur < size && is_alphanum(src[cur])){
                         name += src[cur];
                         cur++;
                     }
-                    token_add(Tok_ident,name,line,col);
+                    if(is_keyword(name))
+                        token_add(keywords[name],name,line,col);
+                    else
+                        token_add(Tok_ident,name,line,col);
                     break;
                 }
                 ERROR("Invalid character: %c" , src[cur]);

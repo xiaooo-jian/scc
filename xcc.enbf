@@ -1,11 +1,13 @@
 
-Function    => Stmt?
-Stmt        => ExprStmt ';' ?
-ExprStmt    => (ident '=')? Expression | Expression 
-Expression  => EqualExpr
-EqualExpr   => CompareExpr (== !=) EqualExpr
-CompareExpr => AddMinsExpr (> < >= <=) CompareExpr
-AddMinsExpr => MulDivExpr (+ -) AddMinsExpr
-MulDivExpr  => Primary  (* /) Unary
-Unary       => (- +)? Primary
-Primary     => Num | '(' Expression ')' | ident
+Function    =>  Stmt?
+Stmt        =>  ExprStmt ';' Stmt?
+            |   ReturnStmt ';' 
+ReturnStmt  =>  'return' Expression
+ExprStmt    =>  (ident '=')? Expression | Expression 
+Expression  =>  EqualExpr
+EqualExpr   =>  CompareExpr (== !=) EqualExpr
+CompareExpr =>  AddMinsExpr (> < >= <=) CompareExpr
+AddMinsExpr =>  MulDivExpr (+ -) AddMinsExpr
+MulDivExpr  =>  Primary  (* /) Unary
+Unary       =>  (- +)? Primary
+Primary     =>  Num | '(' Expression ')' | ident

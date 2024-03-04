@@ -35,4 +35,4 @@ run:
 .PHONY:clean
 clean:
 	@echo "Remove linked and compiled files......"
-	rm -rf $(OBJ) ./build
+	rm -rf $(OBJ) ./build/*

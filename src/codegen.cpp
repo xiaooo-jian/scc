@@ -34,7 +34,7 @@ void Codegen::codegen(string filename)
     codegenStmt();
     codegen_end();
 
-    assert(depth == 0);
+    
     outFile.close();
 }
 
@@ -51,6 +51,7 @@ void Codegen::codegen_init()
 
 void Codegen::codegen_end()
 {
+    outFile << ".L.return:\n";
     outFile << "\tmov %rbp, %rsp\n";
     outFile << "\tpop %rbp\n";
     outFile << "\tret\n";
@@ -81,12 +82,25 @@ void Codegen::pop(string arg)
 
 void Codegen::codegenStmt(){
     for(auto root: func->stmts){
-        codegenExpr(root);
+        if(root->type == AST_Expr){
+            // root->type = AST_None;
+            codegenExpr(root->left);
+        }
+        else if (root->type == AST_Return){
+            root->type = AST_Expr;
+            codegenExpr(root->left);
+            outFile << "\tjmp .L.return\n";
+        }
+            assert(depth == 0);
     }
+
 }
+
 
 void Codegen::codegenExpr(AST_node *node)
 {
+    // if(node == NULL) return;
+            // cout <<node->type<< endl;
     switch (node->type)
     {
     case AST_Num:
@@ -99,7 +113,7 @@ void Codegen::codegenExpr(AST_node *node)
     case AST_Assign:
         outFile << "\tlea " << func->get_offset(node->name) << "(%rbp), %rax\n";
         push();
-        codegenExpr(node->right);
+        codegenExpr(node->left);
         pop("%rdi");
         outFile << "\tmov %rax, (%rdi)\n";
         return;
@@ -107,18 +121,19 @@ void Codegen::codegenExpr(AST_node *node)
         LOG("nothing...");
     }
     
-    if (node->right != NULL)
-    { 
+    if(node->right){
         codegenExpr(node->right);
         if(node->type != AST_None )
             push();
     }
-    if (node->left != NULL)
-    {
+    if(node->left){
         codegenExpr(node->left);
         if(node->type != AST_None )
             pop("%rdi");
     }
+
+
+
 
 
     switch (node->type)
@@ -136,7 +151,6 @@ void Codegen::codegenExpr(AST_node *node)
         outFile << "\tcqo\n"
                 << "\tidiv %rdi\n";
         break;
-
     case AST_Eq:
         outFile << "\tcmp %rdi, %rax\n";
         outFile << "\tsete %al\n";

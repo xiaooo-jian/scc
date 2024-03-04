@@ -35,6 +35,7 @@ public:
 class SymTable{
 public:
     unordered_map<string, Variable> table;
+    
     bool add(Type type, string name);
     bool add(Type type, string name, int value);
     bool add(Type type, string name, int value, int offset);

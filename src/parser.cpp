@@ -33,8 +33,16 @@ vector<AST_node*> Parser::parserStmt(){
     
     vector<AST_node*> roots;
     while(tokens[cur].type != Tok_eof){
-        AST_node *node = parserExprStmt();
-        // node->type = AST_Expr;
+        AST_node *node;
+        if(match(Tok_return)){
+            cur++;
+            node = parserExprStmt();
+            node->type = AST_Return;
+
+        }else{
+            node = parserExprStmt();
+            node->type = AST_Expr;
+        }
         roots.push_back(node);           
         skip(Tok_seg);
     }
@@ -48,20 +56,20 @@ AST_node* Parser::parserExprStmt(){
         if(!cur_table->add(TY_int,tokens[cur].value)){
             ERROR("Redefined variable %s",tokens[cur].value.c_str());
         }
-        node->name = tokens[cur].value;
-        node->type = AST_Assign;
+        string name = tokens[cur].value;
+        
         cur++;
         skip(Tok_assign);
-        node->right = parserExpression();
-        
-        
+        node->left = parserExpression();
+        node->left->type = AST_Assign;
+        node->left->name = name;
+
         // if (!cur_table->add(TY_int,node->name,parserExpression()->val)){
         //     ERROR("Redefined variable %s",node->name.c_str());
         // }
     }else{
         node = parserExpression();
     }
-    
     return node;
 }
 
@@ -69,7 +77,8 @@ AST_node* Parser::parserExprStmt(){
 AST_node *Parser::parserExpression()
 {
     LOG("Expression\n");
-    AST_node *node = parserEqualExpr();
+    AST_node *node = new AST_node;
+    node->left =parserEqualExpr(); //不增加这一个节点的话在codegen时会被跳过
     return node;
 };
 
@@ -189,14 +198,16 @@ Function* Parser::parse()
 
 }
 
-void Parser::parserDisplay(AST_node *node){
-    if(node->right){
-        parserDisplay(node->right);
-    }
-    if (node->left)
-    {
-        parserDisplay(node->left);
-    }
+void Parser::parserDisplay(AST_node *node,int n=0){
+    if(!node) return ;
+    
+    // if(node->right){
+        parserDisplay(node->right,n+1);
+    // }
+    // if (node->left)
+    // {
+        parserDisplay(node->left,n+1);
+    // }
       
-    cout << node->val << " type:" << node->type << endl;
+    cout << string(n,' ') << node->val << " type:" << node->type << endl;
 }

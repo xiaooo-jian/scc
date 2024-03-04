@@ -34,6 +34,6 @@ public:
 
     bool match(TokenType type);
     void skip(TokenType type);
-    void parserDisplay(AST_node *node);
+    void parserDisplay(AST_node *node,int);
 };
 

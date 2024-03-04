@@ -28,6 +28,8 @@ enum TokenType{
     Tok_rt,     // <=
     Tok_seg,    // ;
     Tok_assign, // =
+
+    Tok_return,
     Tok_eof
 };
 
@@ -68,6 +70,8 @@ enum AST_type{
     AST_Assign, // =
     AST_val,    //变量
     AST_Expr,
+    AST_Return,
+    
 };
 
 struct AST_node{
