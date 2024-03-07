@@ -18,7 +18,7 @@ public:
     void codegenMultDivExpr(AST_node* node);
     void codegenExpression(AST_node* node);
 
-    void codegenStmt();
+    void codegenStmt(vector<AST_node*> stmts);
     void codegenExpr(AST_node * node);
 
     void load(int value);   

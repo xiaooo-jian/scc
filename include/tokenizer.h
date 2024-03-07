@@ -1,9 +1,5 @@
 #include <common.h>
 
-
-
-
-
 class Tokenizer
 {
 public:

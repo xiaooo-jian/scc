@@ -31,7 +31,8 @@ void Codegen::codegen(string filename)
     iden_offset();
 
     codegen_init();
-    codegenStmt();
+    codegenStmt(func->stmts);
+    assert(depth == 0);
     codegen_end();
 
     
@@ -80,18 +81,28 @@ void Codegen::pop(string arg)
     depth--;
 }
 
-void Codegen::codegenStmt(){
-    for(auto root: func->stmts){
-        if(root->type == AST_Expr){
-            // root->type = AST_None;
-            codegenExpr(root->left);
+void Codegen::codegenStmt(vector<AST_node*> stmts){
+    for(auto root: stmts){
+        
+        switch(root->type){
+            case AST_Expr:
+                codegenExpr(root->left);
+                break;
+            case AST_Return:
+                root->type = AST_Expr;
+                codegenExpr(root->left);
+                outFile << "\tjmp .L.return\n";
+                break ;
+            case AST_Block:
+                if(root->childs.size() == 0) 
+                    break;
+                
+                codegenStmt(root->childs);
+                break;
+            default:
+                break;
         }
-        else if (root->type == AST_Return){
-            root->type = AST_Expr;
-            codegenExpr(root->left);
-            outFile << "\tjmp .L.return\n";
-        }
-            assert(depth == 0);
+
     }
 
 }

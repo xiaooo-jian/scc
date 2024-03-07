@@ -22,30 +22,55 @@ void Parser::skip(TokenType type){
 
 SymTable *cur_table ;
 
+Function* Parser::parse()
+{
+    cur = 0;
+
+    Function *func = parserFunction();
+    return func;
+
+}
+
 Function* Parser::parserFunction(){
     Function *func = new Function();
+
     cur_table = (SymTable*)&(func->sym_table);
-    func->stmts = parserStmt();
+    // skip(Tok_lcul);
+    while(!match(Tok_eof))
+        func->stmts = parserStmt();
+        
+    // skip(Tok_rcul);
     return func;
 }
 
 vector<AST_node*> Parser::parserStmt(){
-    
+
     vector<AST_node*> roots;
-    while(tokens[cur].type != Tok_eof){
-        AST_node *node;
-        if(match(Tok_return)){
+    while(!match(Tok_rcul)&&!match(Tok_eof)){
+        AST_node *node = new AST_node(); // 要记得用new开辟空间啊啊啊啊
+        if(match(Tok_lcul)){
+
+            cur ++ ;
+            node->childs = parserStmt();
+            skip(Tok_rcul);
+            node->type = AST_Block;
+        }
+        else if(match(Tok_return)){
             cur++;
             node = parserExprStmt();
             node->type = AST_Return;
-
+            skip(Tok_seg);
         }else{
+
             node = parserExprStmt();
             node->type = AST_Expr;
+            skip(Tok_seg);
         }
-        roots.push_back(node);           
-        skip(Tok_seg);
+        if(node)
+            roots.push_back(node);           
+        // delete node;
     }
+
     return roots;
 }
 
@@ -190,13 +215,7 @@ AST_node *Parser::parserPrimary()
 }
 
 
-Function* Parser::parse()
-{
-    cur = 0;
 
-    return parserFunction();
-
-}
 
 void Parser::parserDisplay(AST_node *node,int n=0){
     if(!node) return ;

@@ -1,7 +1,8 @@
 
-Function    =>  Stmt?
-Stmt        =>  ExprStmt ';' Stmt?
+Function    =>  Stmt ? 
+Stmt        =>  ExprStmt ';' 
             |   ReturnStmt ';' 
+            |    '{'  Stmt ? '}'
 ReturnStmt  =>  'return' Expression
 ExprStmt    =>  (ident '=')? Expression | Expression 
 Expression  =>  EqualExpr

@@ -28,6 +28,8 @@ enum TokenType{
     Tok_rt,     // <=
     Tok_seg,    // ;
     Tok_assign, // =
+    Tok_lcul, // { 
+    Tok_rcul, // }
 
     Tok_return,
     Tok_eof
@@ -70,6 +72,7 @@ enum AST_type{
     AST_Assign, // =
     AST_val,    //变量
     AST_Expr,
+    AST_Block,
     AST_Return,
     
 };
@@ -80,12 +83,14 @@ struct AST_node{
     int val;
     string name;
     AST_type type;
+    vector<AST_node*> childs;
     AST_node(const AST_node& node){
         this->left = node.left;
         this->right = node.right;
         this->val = node.val;
         this->type = node.type;
         this->name = node.name;
+        this->childs = vector<AST_node*>(node.childs);
     };
     AST_node(){
 

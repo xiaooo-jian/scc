@@ -21,7 +21,7 @@ public:
     vector<AST_node*> parserStmt();
 
     AST_node* parserExprStmt();
-
+    AST_node* parserCompoundStmt();
     AST_node* parserExpression();
     AST_node* parserEqualExpr();
     AST_node* parserCompareExpr();

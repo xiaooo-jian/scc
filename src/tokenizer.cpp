@@ -108,6 +108,14 @@ void Tokenizer::tokenize(string src){
                     cur ++;
                 }
                 break;
+            case '{':
+                token_add(Tok_lcul,"{",line,col);
+                cur ++;
+                break;
+            case '}':
+                token_add(Tok_rcul,"}",line,col);
+                cur ++;
+                break;
             default:
 
                 if(is_num(src[cur])){
