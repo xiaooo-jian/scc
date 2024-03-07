@@ -60,8 +60,10 @@ vector<AST_node*> Parser::parserStmt(){
             node = parserExprStmt();
             node->type = AST_Return;
             skip(Tok_seg);
-        }else{
-
+        }else if(match(Tok_seg)){
+            cur++;
+        }    
+        else{
             node = parserExprStmt();
             node->type = AST_Expr;
             skip(Tok_seg);
