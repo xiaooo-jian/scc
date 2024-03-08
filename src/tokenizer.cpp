@@ -6,7 +6,11 @@ void Tokenizer::token_add(TokenType tok,string val,int line,int col){
 }
 
 void Tokenizer::keywords_init(){
-    keywords = {{"return",Tok_return}};
+    keywords = {
+                    {"return",Tok_return},
+                    {"if",Tok_if},
+                    {"else",Tok_else}
+                };
 }
 
 bool Tokenizer::is_num(char c){

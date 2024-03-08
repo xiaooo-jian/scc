@@ -1,9 +1,10 @@
 
-Function    =>  Stmt ? 
+Function    =>  Stmt * 
 Stmt        =>  ExprStmt ';' 
             |   ReturnStmt ';' 
-            |    '{'  Stmt ? '}'
+            |    '{'  Stmt * '}'
             |   ';'
+            |   'if' '(' Expression ')' Stmt ('else' Stmt)? 
 ReturnStmt  =>  'return' Expression
 ExprStmt    =>  (ident '=')? Expression | Expression 
 Expression  =>  EqualExpr

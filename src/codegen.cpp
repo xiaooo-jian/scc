@@ -18,6 +18,10 @@ void Codegen::iden_offset(){
     func->stack_size = align(offset, 16);
 }
 
+static int jump_count() {
+  static int i = 1;
+  return i++;
+}
 
 void Codegen::codegen(string filename)
 {
@@ -83,7 +87,7 @@ void Codegen::pop(string arg)
 
 void Codegen::codegenStmt(vector<AST_node*> stmts){
     for(auto root: stmts){
-        
+
         switch(root->type){
             case AST_Expr:
                 codegenExpr(root->left);
@@ -96,9 +100,24 @@ void Codegen::codegenStmt(vector<AST_node*> stmts){
             case AST_Block:
                 if(root->childs.size() == 0) 
                     break;
-                
                 codegenStmt(root->childs);
                 break;
+            case AST_If:{
+
+                int c = jump_count();
+                codegenExpr(root->cnod->left);            
+                outFile << "\tcmp $0, %rax\n";
+                outFile << "\tje .L.if.else." << c << endl;
+                codegenStmt(root->then);
+                outFile << "\tjmp .L.if.end." << c << endl;
+                outFile << "\n.L.if.else." << c << ":\n";
+                if(!root->els.empty()){
+                    codegenStmt(root->els);
+                }
+                outFile << "\n.L.if.end." << c << ":\n";
+                break;
+            }
+
             default:
                 break;
         }

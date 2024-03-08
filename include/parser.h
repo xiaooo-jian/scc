@@ -18,10 +18,11 @@ public:
     // void parse();
 
     Function* parserFunction();
-    vector<AST_node*> parserStmt();
+    vector<AST_node*> parserStmt(int times= 0);
 
     AST_node* parserExprStmt();
-    AST_node* parserCompoundStmt();
+    AST_node* parserIfStmt();
+    // vector<AST_node*> parserStmt(int);
     AST_node* parserExpression();
     AST_node* parserEqualExpr();
     AST_node* parserCompareExpr();

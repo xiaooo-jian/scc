@@ -43,7 +43,11 @@ Function* Parser::parserFunction(){
     return func;
 }
 
-vector<AST_node*> Parser::parserStmt(){
+// vector<AST_node*> Parser::parserStmt(){
+
+// }
+
+vector<AST_node*> Parser::parserStmt(int times ){
 
     vector<AST_node*> roots;
     while(!match(Tok_rcul)&&!match(Tok_eof)){
@@ -62,6 +66,19 @@ vector<AST_node*> Parser::parserStmt(){
             skip(Tok_seg);
         }else if(match(Tok_seg)){
             cur++;
+        }else if(match(Tok_if)){
+            cur++;
+            skip(Tok_lbak);
+            node->cnod = parserExpression();
+            skip(Tok_rbak);
+            node->then = parserStmt(1);
+
+            cout << node->then.size() << endl;
+            if(match(Tok_else)){
+                cur ++ ;
+                node->els = parserStmt(1);
+            }
+            node->type = AST_If;
         }    
         else{
             node = parserExprStmt();
@@ -70,11 +87,13 @@ vector<AST_node*> Parser::parserStmt(){
         }
         if(node)
             roots.push_back(node);           
-        // delete node;
+        if(times)//如果是if语句过来的只需要取后面一个语句即可，block看做一个语句
+            break;
     }
-
     return roots;
 }
+
+
 
 AST_node* Parser::parserExprStmt(){
     LOG("ExprStmt\n");
