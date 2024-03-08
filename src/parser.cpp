@@ -15,7 +15,9 @@ void Parser::skip(TokenType type){
         cur++;
         return ;
     }
+        cout << tokens[cur].col << endl;
     ERROR("Expect %d but get %d", type,tokens[cur].type);
+
 
 }
 
@@ -122,27 +124,7 @@ vector<AST_node*> Parser::parserStmt(int times ){
 AST_node* Parser::parserExprStmt(){
     LOG("ExprStmt\n");
     AST_node *node = new AST_node;
-    if(match(Tok_ident) && tokens[cur+1].type == Tok_assign){
-        
-        if(!cur_table->add(TY_int,tokens[cur].value)){
-            // ERROR("Redefined variable %s",tokens[cur].value.c_str());
-
-        }
-        string name = tokens[cur].value;
-        
-        cur++;
-        skip(Tok_assign);
-
-        node->left = parserExpression();
-        node->left->type = AST_Assign;
-        node->left->name = name;
-
-        // if (!cur_table->add(TY_int,node->name,parserExpression()->val)){
-        //     ERROR("Redefined variable %s",node->name.c_str());
-        // }
-    }else{
-        node = parserExpression();
-    }
+    node->left = parserExpression();
     return node;
 }
 
@@ -151,7 +133,12 @@ AST_node *Parser::parserExpression()
 {
     LOG("Expression\n");
     AST_node *node = new AST_node;
-    node->left =parserEqualExpr(); //不增加这一个节点的话在codegen时会被跳过
+    node->left =parserEqualExpr(); 
+    if(match(Tok_assign)){
+        cur++;
+        node->right = parserExpression();
+        node->type = AST_Assign;
+    }
     return node;
 };
 
@@ -212,16 +199,29 @@ AST_node* Parser::parserUnaryExpr(){
     LOG("Unary\n");
     
     int op = 1;
-    while(match(Tok_minus) || match(Tok_plus)){
+    AST_node *node = new AST_node();
+    if(match(Tok_minus) || match(Tok_plus)){
         if(match(Tok_minus)){
             op *= -1;
             cur++;
         }else if(match(Tok_plus)){
             cur++;
         }
+        node = parserUnaryExpr();
+        node->val = op * node->val;
+    }else if(match(Tok_mul)){
+        cur++;
+        node->left = parserUnaryExpr();
+        node->type = AST_Ref;
+    }else if(match(Tok_addr)){
+        cur++;
+        node->left = parserUnaryExpr();
+        node->type = AST_Addr;
     }
-    AST_node *node = parserPrimary();
-    node->val = op * node->val;
+    else{
+        node = parserPrimary();
+    }
+
     return node;
 }
 
@@ -249,7 +249,9 @@ AST_node *Parser::parserPrimary()
         node->name = tokens[cur].value;
         node->type = AST_val;
         if(!cur_table->get(node->name,node->val)){
-            ERROR("variable [%s] not defined \n",node->name.c_str());
+            cur_table->add(TY_int,tokens[cur].value);
+            cur_table->get(node->name,node->val);
+            // ERROR("variable [%s] not defined \n",node->name.c_str());
         }
         cur ++;
     }

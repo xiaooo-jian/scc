@@ -8,11 +8,11 @@ Stmt        =>  ExprStmt ';'
             |   'if' '(' Expression ')' Stmt ('else' Stmt)? 
             |   'while' '(' Expression ')' Stmt
 ReturnStmt  =>  'return' Expression
-ExprStmt    =>  (ident '=')? Expression | Expression 
-Expression  =>  EqualExpr
+ExprStmt    =>  Expression 
+Expression  =>  EqualExpr ('=' Expression )?
 EqualExpr   =>  CompareExpr (== !=) EqualExpr
 CompareExpr =>  AddMinsExpr (> < >= <=) CompareExpr
 AddMinsExpr =>  MulDivExpr (+ -) AddMinsExpr
-MulDivExpr  =>  Primary  (* /) Unary
-Unary       =>  (- +)? Primary
+MulDivExpr  =>  Unary  (* /) MulDivExpr
+Unary       =>  (- + * &) Unary | Primary
 Primary     =>  Num | '(' Expression ')' | ident

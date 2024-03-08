@@ -20,6 +20,7 @@ public:
 
     void codegenStmt(vector<AST_node*> stmts);
     void codegenExpr(AST_node * node);
+    void codegenAddr(AST_node* node);
 
     void load(int value);   
     void add(int r1);

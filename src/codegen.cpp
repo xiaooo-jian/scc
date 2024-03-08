@@ -39,7 +39,6 @@ void Codegen::codegen(string filename)
     assert(depth == 0);
     codegen_end();
 
-    
     outFile.close();
 }
 
@@ -61,17 +60,6 @@ void Codegen::codegen_end()
     outFile << "\tpop %rbp\n";
     outFile << "\tret\n";
 }
-
-void Codegen::load(int value)
-{
-    outFile << "\tmov rax, " << value << endl;
-}
-
-void Codegen::add(int r1)
-{
-    outFile << "\tadd rax, " << r1 << endl;
-}
-
 
 void Codegen::push()
 {
@@ -144,6 +132,22 @@ void Codegen::codegenStmt(vector<AST_node*> stmts){
 
 }
 
+void Codegen::codegenAddr(AST_node* node){
+    // cout << node->type << endl;
+    switch (node->type) {
+        
+        case AST_val:
+            outFile << "\tlea " << func->get_offset(node->name) << "(%rbp), %rax\n";
+            break;
+        case AST_Ref:
+            codegenExpr(node->left);
+            break;
+        case AST_None:
+            codegenAddr(node->left);
+        default:
+            break;
+    }  
+}
 
 void Codegen::codegenExpr(AST_node *node)
 {
@@ -155,15 +159,27 @@ void Codegen::codegenExpr(AST_node *node)
         outFile << "\tmov $" << node->val << ", %rax\n";
         return;
     case AST_val:
-        outFile << "\tlea " << func->get_offset(node->name) << "(%rbp), %rax\n";
+        codegenAddr(node);
         outFile << "\tmov (%rax), %rax\n";
         return;
     case AST_Assign:
-        outFile << "\tlea " << func->get_offset(node->name) << "(%rbp), %rax\n";
+        codegenAddr(node->left);
         push();
-        codegenExpr(node->left);
+
+        codegenExpr(node->right);
         pop("%rdi");
         outFile << "\tmov %rax, (%rdi)\n";
+        return;
+    case AST_Ref:
+        codegenExpr(node->left);
+        cout << "here"<< endl;
+        outFile << "\tmov (%rax), %rax\n";
+        
+        return;
+    case AST_Addr:
+        // codegenAddr(node);
+        codegenAddr(node->left);
+        
         return;
     default:
         LOG("nothing...");
@@ -229,6 +245,7 @@ void Codegen::codegenExpr(AST_node *node)
         outFile << "\tsetl %al\n";
         outFile << "\tmovzb %al, %rax\n";
         break;
+    
     case AST_None:
     case AST_Expr:
         break;

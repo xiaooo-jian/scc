@@ -30,6 +30,7 @@ enum TokenType{
     Tok_assign, // =
     Tok_lcul, // { 
     Tok_rcul, // }
+    Tok_addr,  // &
 
     Tok_return,
     Tok_if,
@@ -80,7 +81,9 @@ enum AST_type{
     AST_Return,
     AST_If,
     AST_For,
-    AST_While
+    AST_While,
+    AST_Ref,
+    AST_Addr,
 };
 
 struct AST_node{
@@ -108,7 +111,7 @@ struct AST_node{
         this->els = node.els;
     };
     AST_node(){
-
+        val = 0;
     }
     // ~AST_node(){
     //     delete left;

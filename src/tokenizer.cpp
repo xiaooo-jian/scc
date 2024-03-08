@@ -81,6 +81,10 @@ void Tokenizer::tokenize(string src){
                 token_add(Tok_rbak,")",line,col);
                 cur++;
                 break;
+            case '&':
+                token_add(Tok_addr,"&",line,col);
+                cur++;
+                break;
             case '=':
                 if(src[cur + 1] == '='){
                     token_add(Tok_eq,"==",line,col);
