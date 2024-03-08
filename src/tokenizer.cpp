@@ -10,7 +10,8 @@ void Tokenizer::keywords_init(){
                     {"return",Tok_return},
                     {"if",Tok_if},
                     {"else",Tok_else},
-                    {"for",Tok_for}
+                    {"for",Tok_for},
+                    {"while",Tok_while}
                 };
 }
 

@@ -35,6 +35,7 @@ enum TokenType{
     Tok_if,
     Tok_else,
     Tok_for,
+    Tok_while,
     Tok_eof
 };
 
@@ -78,7 +79,8 @@ enum AST_type{
     AST_Block,
     AST_Return,
     AST_If,
-    AST_For
+    AST_For,
+    AST_While
 };
 
 struct AST_node{

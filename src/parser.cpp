@@ -96,6 +96,14 @@ vector<AST_node*> Parser::parserStmt(int times ){
             node->then = parserStmt(1);
             node->type = AST_For;
         }   
+        else if(match(Tok_while)){
+            cur++;
+            skip(Tok_lbak);
+            node->cond = parserExpression();
+            skip(Tok_rbak);
+            node->then = parserStmt(1);
+            node->type = AST_For;
+        }
         else{
             node = parserExprStmt();
             node->type = AST_Expr;

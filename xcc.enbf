@@ -6,6 +6,7 @@ Stmt        =>  ExprStmt ';'
             |   ';'
             |   'for' '(' ExprStmt ';'ExprStmt ';' Stmt ')' stmts
             |   'if' '(' Expression ')' Stmt ('else' Stmt)? 
+            |   'while' '(' Expression ')' Stmt
 ReturnStmt  =>  'return' Expression
 ExprStmt    =>  (ident '=')? Expression | Expression 
 Expression  =>  EqualExpr
