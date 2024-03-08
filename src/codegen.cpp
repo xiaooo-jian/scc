@@ -105,7 +105,7 @@ void Codegen::codegenStmt(vector<AST_node*> stmts){
             case AST_If:{
 
                 int c = jump_count();
-                codegenExpr(root->cnod->left);            
+                codegenExpr(root->cond->left);            
                 outFile << "\tcmp $0, %rax\n";
                 outFile << "\tje .L.if.else." << c << endl;
                 codegenStmt(root->then);
@@ -115,6 +115,24 @@ void Codegen::codegenStmt(vector<AST_node*> stmts){
                     codegenStmt(root->els);
                 }
                 outFile << "\n.L.if.end." << c << ":\n";
+                break;
+            }
+            case AST_For:{
+                int c = jump_count();
+                if(root->init)
+                    codegenExpr(root->init);
+                outFile << ".L.begin." << c << ":\n";
+                if(root->cond){
+                    codegenExpr(root->cond->left);
+                    outFile << "\tcmp $0, %rax\n";
+                    outFile << "\tje .L.end." << c << endl;
+                }
+                codegenStmt(root->then);
+                if(root->expr){
+                    codegenExpr(root->expr);
+                }
+                outFile << "\tjmp .L.begin." << c << endl;
+                outFile << "\n.L.end." << c << ":\n";
                 break;
             }
 

@@ -4,6 +4,7 @@ Stmt        =>  ExprStmt ';'
             |   ReturnStmt ';' 
             |    '{'  Stmt * '}'
             |   ';'
+            |   'for' '(' ExprStmt ';'ExprStmt ';' Stmt ')' stmts
             |   'if' '(' Expression ')' Stmt ('else' Stmt)? 
 ReturnStmt  =>  'return' Expression
 ExprStmt    =>  (ident '=')? Expression | Expression 

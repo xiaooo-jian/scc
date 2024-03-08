@@ -9,7 +9,8 @@ void Tokenizer::keywords_init(){
     keywords = {
                     {"return",Tok_return},
                     {"if",Tok_if},
-                    {"else",Tok_else}
+                    {"else",Tok_else},
+                    {"for",Tok_for}
                 };
 }
 

@@ -34,6 +34,7 @@ enum TokenType{
     Tok_return,
     Tok_if,
     Tok_else,
+    Tok_for,
     Tok_eof
 };
 
@@ -76,7 +77,8 @@ enum AST_type{
     AST_Expr,
     AST_Block,
     AST_Return,
-    AST_If
+    AST_If,
+    AST_For
 };
 
 struct AST_node{
@@ -85,8 +87,9 @@ struct AST_node{
     int val;
     string name;
     AST_type type;
-
-    AST_node* cnod;
+    AST_node* init;
+    AST_node* cond;
+    AST_node* expr;
     vector<AST_node*> then;
     vector<AST_node*> els;
 
@@ -98,7 +101,7 @@ struct AST_node{
         this->type = node.type;
         this->name = node.name;
         this->childs = vector<AST_node*>(node.childs);
-        this->cnod = node.cnod;
+        this->cond = node.cond;
         this->then = node.then;
         this->els = node.els;
     };

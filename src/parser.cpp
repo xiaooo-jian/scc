@@ -69,7 +69,7 @@ vector<AST_node*> Parser::parserStmt(int times ){
         }else if(match(Tok_if)){
             cur++;
             skip(Tok_lbak);
-            node->cnod = parserExpression();
+            node->cond = parserExpression();
             skip(Tok_rbak);
             node->then = parserStmt(1);
 
@@ -79,7 +79,23 @@ vector<AST_node*> Parser::parserStmt(int times ){
                 node->els = parserStmt(1);
             }
             node->type = AST_If;
-        }    
+        } else if(match(Tok_for)){
+
+            cur++;
+            skip(Tok_lbak);
+
+            if(!match(Tok_seg))
+                node->init = parserExprStmt();
+            skip(Tok_seg);
+            if(!match(Tok_seg))
+                node->cond = parserExprStmt();
+            skip(Tok_seg);
+            if(!match(Tok_rbak))
+                node->expr = parserExprStmt();
+            skip(Tok_rbak);
+            node->then = parserStmt(1);
+            node->type = AST_For;
+        }   
         else{
             node = parserExprStmt();
             node->type = AST_Expr;
@@ -99,13 +115,16 @@ AST_node* Parser::parserExprStmt(){
     LOG("ExprStmt\n");
     AST_node *node = new AST_node;
     if(match(Tok_ident) && tokens[cur+1].type == Tok_assign){
+        
         if(!cur_table->add(TY_int,tokens[cur].value)){
-            ERROR("Redefined variable %s",tokens[cur].value.c_str());
+            // ERROR("Redefined variable %s",tokens[cur].value.c_str());
+
         }
         string name = tokens[cur].value;
         
         cur++;
         skip(Tok_assign);
+
         node->left = parserExpression();
         node->left->type = AST_Assign;
         node->left->name = name;
@@ -228,7 +247,7 @@ AST_node *Parser::parserPrimary()
     }
     else 
     {
-        cout << tokens[cur].type <<endl;
+        cout << tokens[cur].line << " " << tokens[cur].col <<endl;
         ERROR("parser error for get [%s] \n",tokens[cur].value.c_str());
 
     }
