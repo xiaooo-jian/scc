@@ -21,8 +21,21 @@ void Parser::skip(TokenType type){
 
 }
 
-
 SymTable *cur_table ;
+
+void Parser::new_ident(AST_node* node){
+    AST_node* id = new AST_node;
+    id->name = tokens[cur].value;                            
+    id->type = AST_val;
+    
+
+    if(cur_table->get(id->name,id->val)){
+        ERROR("variable [%s] redefined \n",id->name.c_str());
+    }
+    cur_table->add(Type(TY_int),tokens[cur].value);
+    node->left = id;
+
+}
 
 Function* Parser::parse()
 {
@@ -41,7 +54,7 @@ Function* Parser::parserFunction(){
     while(!match(Tok_eof)){
         func->stmts = parserStmt();
         typeAdd(func->stmts);
-    } 
+    }         
     // skip(Tok_rcul);
     return func;
 }
@@ -50,10 +63,12 @@ Function* Parser::parserFunction(){
 
 // }
 
+
 vector<AST_node*> Parser::parserStmt(int times ){
 
     vector<AST_node*> roots;
     while(!match(Tok_rcul)&&!match(Tok_eof)){
+        bool declare_flag = true;
         AST_node *node = new AST_node(); // 要记得用new开辟空间啊啊啊啊
         if(match(Tok_lcul)){
 
@@ -88,7 +103,7 @@ vector<AST_node*> Parser::parserStmt(int times ){
             skip(Tok_lbak);
 
             if(!match(Tok_seg))
-                node->init = parserExprStmt();
+                node->init = parserStmt(1);
             skip(Tok_seg);
             if(!match(Tok_seg))
                 node->cond = parserExprStmt();
@@ -107,12 +122,40 @@ vector<AST_node*> Parser::parserStmt(int times ){
             node->then = parserStmt(1);
             node->type = AST_For;
         }
+        else if(match(Tok_int)){
+            cur++;
+            Type *t = new Type(TY_int);
+            while(match(Tok_mul)){
+                t = new Type(TY_point, t);
+                cur++;
+            }
+                       
+            while(match(Tok_ident)){
+                
+                AST_node *temp = new AST_node();
+                temp->op_type = t;
+
+                new_ident(temp);
+
+                cur++;
+                if(match(Tok_assign)){
+                    cur++;
+                    temp->type = AST_Assign;
+                    temp->right = parserExpression();
+                }
+                roots.push_back(temp);
+                if(match(Tok_comma))
+                    cur++;
+            }
+            skip(Tok_seg);
+            declare_flag = false;
+        }
         else{
             node = parserExprStmt();
             node->type = AST_Expr;
             skip(Tok_seg);
         }
-        if(node)
+        if(node && declare_flag)
             roots.push_back(node);           
         if(times)//如果是if语句过来的只需要取后面一个语句即可，block看做一个语句
             break;
@@ -175,7 +218,7 @@ AST_node *Parser::parserAddMinsExpr()
     node->left = parserMulDivExpr();
     if (match(Tok_plus) )
     {
-        node->type = last_op == AST_Add ? AST_Add : AST_Mins; 
+        node->type = last_op == AST_Mins ? AST_Mins:AST_Add ; 
         cur++;
         last_op = AST_Add;
         node->right = parserAddMinsExpr();
@@ -204,7 +247,7 @@ AST_node *Parser::parserAddMinsExpr()
         node->right = new_right;
 
     }else if(match(Tok_minus)){
-        node->type =  last_op == AST_Add ? AST_Mins : AST_Add; 
+        node->type =  last_op == AST_Mins ? AST_Add:AST_Mins ; 
         cur++;
         last_op = AST_Mins;
         node->right = parserAddMinsExpr();
@@ -318,9 +361,7 @@ AST_node *Parser::parserPrimary()
         node->name = tokens[cur].value;
         node->type = AST_val;
         if(!cur_table->get(node->name,node->val)){
-            cur_table->add(Type(TY_int),tokens[cur].value);
-            cur_table->get(node->name,node->val);
-            // ERROR("variable [%s] not defined \n",node->name.c_str());
+            ERROR("variable [%s] not defined \n",node->name.c_str());
         }
         cur ++;
     }

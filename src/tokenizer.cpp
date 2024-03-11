@@ -11,7 +11,8 @@ void Tokenizer::keywords_init(){
                     {"if",Tok_if},
                     {"else",Tok_else},
                     {"for",Tok_for},
-                    {"while",Tok_while}
+                    {"while",Tok_while},
+                    {"int",Tok_int}
                 };
 }
 
@@ -125,6 +126,10 @@ void Tokenizer::tokenize(string src){
             case '}':
                 token_add(Tok_rcul,"}",line,col);
                 cur ++;
+                break;
+            case ',':
+                token_add(Tok_comma,",",line,col);
+                cur++;
                 break;
             default:
 

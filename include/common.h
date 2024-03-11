@@ -31,13 +31,14 @@ enum TokenType{
     Tok_lcul, // { 
     Tok_rcul, // }
     Tok_addr,  // &
-
+    Tok_comma, // ,
     Tok_return,
     Tok_if,
     Tok_else,
     Tok_for,
     Tok_while,
-    Tok_eof
+    Tok_int,
+    Tok_eof,
 };
 
 struct Token{
@@ -112,7 +113,7 @@ struct AST_node{
     int val;
     string name;
     AST_type type;
-    AST_node* init;
+    vector<AST_node*> init;
     AST_node* cond;
     AST_node* expr;
     vector<AST_node*> then;

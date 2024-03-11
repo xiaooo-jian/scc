@@ -4,9 +4,11 @@ Stmt        =>  ExprStmt ';'
             |   ReturnStmt ';' 
             |    '{'  Stmt * '}'
             |   ';'
+            |   DeclarStmt
             |   'for' '(' ExprStmt ';'ExprStmt ';' Stmt ')' stmts
             |   'if' '(' Expression ')' Stmt ('else' Stmt)? 
             |   'while' '(' Expression ')' Stmt
+DeclarStmt  =>  'int' '*'? ident (',' ident)? ('=' expr)? ';'
 ReturnStmt  =>  'return' Expression
 ExprStmt    =>  Expression 
 Expression  =>  EqualExpr ('=' Expression )?

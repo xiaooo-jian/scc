@@ -30,7 +30,7 @@ public:
     AST_node* parserPrimary();
 
 
-
+    void new_ident(AST_node* node);
     bool match(TokenType type);
     void skip(TokenType type);
     void parserDisplay(AST_node *node,int);
