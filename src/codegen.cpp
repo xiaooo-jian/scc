@@ -10,12 +10,16 @@ int Codegen::align(int n, int align) {
 }
 
 void Codegen::iden_offset(){
-    int offset = 0;
-    for(auto& val : func->sym_table.table){
-        offset += 8;
-        val.second.offset = -offset;
+
+    for(auto& f : funcs){
+        int offset = 0;
+        for(auto& val : f->sym_table.table){
+            offset += 8;
+            val.second.offset = -offset;
+        }
+        f->stack_size = align(offset, 16);
     }
-    func->stack_size = align(offset, 16);
+
 }
 
 static int jump_count() {
@@ -34,18 +38,26 @@ void Codegen::codegen(string filename)
 
     iden_offset();
 
-    codegen_init();
-    codegenStmt(func->stmts);
-    assert(depth == 0);
-    codegen_end();
-
+    
+    for(auto f : funcs){
+        func = f;
+        codegen_init();
+        int n = f->params.size();
+        for(int i = 0 ; i < n ;i++){
+            outFile << "\tmov " << args_reg[i] << ", " << f->sym_table.table[f->params[i]->left->name].offset << "(%rbp)\n"; 
+        }
+            
+        codegenStmt(f->stmts);
+        assert(depth == 0);
+        codegen_end();
+    }
     outFile.close();
 }
 
 void Codegen::codegen_init()
 {
-    outFile << "\t.globl main\n";
-    outFile << "main:\n";
+    outFile << "\t.globl " << func->name << "\n";
+    outFile << func->name <<  ":\n";
     // stack
     outFile << "\tpush %rbp\n";
     outFile << "\tmov %rsp, %rbp\n";
@@ -55,7 +67,7 @@ void Codegen::codegen_init()
 
 void Codegen::codegen_end()
 {
-    outFile << ".L.return:\n";
+    outFile << ".L.return." << func->name << ":\n";
     outFile << "\tmov %rbp, %rsp\n";
     outFile << "\tpop %rbp\n";
     outFile << "\tret\n";
@@ -83,7 +95,7 @@ void Codegen::codegenStmt(vector<AST_node*> stmts){
             case AST_Return:
                 root->type = AST_Expr;
                 codegenExpr(root->left);
-                outFile << "\tjmp .L.return\n";
+                outFile << "\tjmp .L.return." << func->name << endl;
                 break ;
             case AST_Block:
                 if(root->childs.size() == 0) 
@@ -164,6 +176,18 @@ void Codegen::codegenExpr(AST_node *node)
         codegenAddr(node);
         outFile << "\tmov (%rax), %rax\n";
         return;
+    case AST_Func:{
+        int num = 0;
+        for(auto arg : node->init){
+            codegenExpr(arg);
+            push();
+            num ++;
+        }
+        for(int i = num-1 ; i >= 0 ; i--)
+            pop(args_reg[i]);
+        outFile << "\tmov $0, %rax\n";
+        outFile << "\tcall " << node->name << "\n";
+        return ;}
     case AST_Assign:
         codegenAddr(node->left);
         push();
@@ -183,6 +207,7 @@ void Codegen::codegenExpr(AST_node *node)
         codegenAddr(node->left);
         
         return;
+
     default:
         LOG("nothing...");
     }

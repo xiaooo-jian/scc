@@ -11,10 +11,10 @@ public:
     ~Parser(){};
     // vector<Token> tokens;
     vector<Token> tokens;
-
+    
     int cur;
 
-    Function* parse();
+    vector<Function*> parse();
     // void parse();
 
     Function* parserFunction();

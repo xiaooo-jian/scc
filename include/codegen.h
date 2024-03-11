@@ -4,12 +4,13 @@
 class Codegen{
 public:
     int depth=0;
+    vector<Function*> funcs;
     Function* func;
-
     ofstream outFile;
     int align(int n, int align);
     void iden_offset();
 
+    vector<string> args_reg;
 
     void codegen(string filename);
     
@@ -36,4 +37,8 @@ public:
     void codegen_end();
 
     void codegen_print(const char * str); 
+
+    Codegen(){
+        args_reg = vector<string>({"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"});
+    }
 };

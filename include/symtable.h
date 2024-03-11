@@ -50,6 +50,7 @@ public:
     Type return_type;
     string name;
     int stack_size;
+    vector<AST_node*> params;
     SymTable sym_table;
     vector<AST_node*> stmts;
 

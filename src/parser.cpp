@@ -15,7 +15,11 @@ void Parser::skip(TokenType type){
         cur++;
         return ;
     }
-        cout << tokens[cur].col << endl;
+     cout << tokens[cur].col << endl;
+        // for(int i = -3 ; i < 3 ;i++){
+        //     cout << tokens[cur+i].value << " ";
+        // }
+                    
     ERROR("Expect %d but get %d", type,tokens[cur].type);
 
 
@@ -33,29 +37,64 @@ void Parser::new_ident(AST_node* node){
         ERROR("variable [%s] redefined \n",id->name.c_str());
     }
     cur_table->add(Type(TY_int),tokens[cur].value);
+
     node->left = id;
 
 }
 
-Function* Parser::parse()
+vector<Function*> Parser::parse()
 {
     cur = 0;
-
-    Function *func = parserFunction();
-    return func;
+    vector<Function*> funcs;
+    while(!match(Tok_eof)){
+        funcs.push_back(parserFunction());
+    }
+    
+    return funcs;
 
 }
 
+
+
+
 Function* Parser::parserFunction(){
     Function *func = new Function();
-
     cur_table = (SymTable*)&(func->sym_table);
-    // skip(Tok_lcul);
-    while(!match(Tok_eof)){
+
+    if(match(Tok_int)){
+        cur++;
+        func->return_type = Type(TY_int);
+    }
+    if(match(Tok_ident)){
+        func->name = tokens[cur].value;
+        cur++;
+    }
+    skip(Tok_lbak);
+    while(!match(Tok_rbak) ){ // without parameter
+        cur++;
+        Type *t = new Type(TY_int);
+        while(match(Tok_mul)){
+            t = new Type(TY_point, t);
+            cur++;
+        }
+        if(match(Tok_ident)){
+            AST_node *temp = new AST_node();
+            temp->op_type = t;
+            new_ident(temp);
+            cur++;
+
+            func->params.push_back(temp);
+            if(match(Tok_comma))
+                cur++;
+        }
+    }
+    skip(Tok_rbak);
+    skip(Tok_lcul);
+    while(!match(Tok_rcul)){    
         func->stmts = parserStmt();
-        typeAdd(func->stmts);
+        typeAdd(func->stmts);    
     }         
-    // skip(Tok_rcul);
+    skip(Tok_rcul);
     return func;
 }
 
@@ -104,7 +143,8 @@ vector<AST_node*> Parser::parserStmt(int times ){
 
             if(!match(Tok_seg))
                 node->init = parserStmt(1);
-            skip(Tok_seg);
+            if(match(Tok_seg))
+                skip(Tok_seg);   
             if(!match(Tok_seg))
                 node->cond = parserExprStmt();
             skip(Tok_seg);
@@ -218,9 +258,9 @@ AST_node *Parser::parserAddMinsExpr()
     node->left = parserMulDivExpr();
     if (match(Tok_plus) )
     {
-        node->type = last_op == AST_Mins ? AST_Mins:AST_Add ; 
+        node->type = AST_Add ; 
         cur++;
-        last_op = AST_Add;
+        // last_op = AST_Add;
         node->right = parserAddMinsExpr();
 
         typeAdd(node);
@@ -247,9 +287,9 @@ AST_node *Parser::parserAddMinsExpr()
         node->right = new_right;
 
     }else if(match(Tok_minus)){
-        node->type =  last_op == AST_Mins ? AST_Add:AST_Mins ; 
+        node->type =  AST_Mins ; 
         cur++;
-        last_op = AST_Mins;
+        // last_op = AST_Mins;
         node->right = parserAddMinsExpr();
         typeAdd(node);
         //num-num
@@ -296,10 +336,11 @@ AST_node *Parser::parserMulDivExpr()
     node->left = parserUnaryExpr();
     if (match(Tok_mul) || match(Tok_div))
     {
-        if(last_op == AST_Divide )
-            node->type = match(Tok_mul) ? AST_Divide : AST_Divide;
-        else    
-            node->type = match(Tok_mul) ? AST_Multiply : AST_Divide;
+        // if(last_op == AST_Divide )
+        //     node->type = match(Tok_mul) ? AST_Divide : AST_Divide;
+        // else    
+        //     node->type = match(Tok_mul) ? AST_Multiply : AST_Divide;
+        node->type = match(Tok_mul) ? AST_Multiply : AST_Divide;
         cur++;
         last_op = AST_Divide; 
         node->right = parserMulDivExpr();
@@ -358,12 +399,26 @@ AST_node *Parser::parserPrimary()
         }
     }
     else if(match(Tok_ident)){
-        node->name = tokens[cur].value;
-        node->type = AST_val;
-        if(!cur_table->get(node->name,node->val)){
-            ERROR("variable [%s] not defined \n",node->name.c_str());
+        if(tokens[cur+1].type!= Tok_lbak){
+            node->name = tokens[cur].value;
+            node->type = AST_val;
+            if(!cur_table->get(node->name,node->val)){
+                ERROR("variable [%s] not defined \n",node->name.c_str());
+            }
+            cur ++;
+        }else{
+            node->name = tokens[cur].value;
+            node->type = AST_Func;
+            cur ++ ;
+            skip(Tok_lbak);
+            while(!match(Tok_rbak)){
+                node->init.push_back(parserExpression());
+                if(match(Tok_comma)){
+                    cur++;
+                }
+            }
+            skip(Tok_rbak);
         }
-        cur ++;
     }
     else 
     {

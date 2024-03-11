@@ -105,6 +105,7 @@ enum AST_type{
     AST_While,
     AST_Ref,
     AST_Addr,
+    AST_Func,
 };
 
 struct AST_node{

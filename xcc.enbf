@@ -1,5 +1,5 @@
-
-Function    =>  Stmt * 
+Program     =>  Function *
+Function    =>  'int' funcname '(' ')' Stmt * 
 Stmt        =>  ExprStmt ';' 
             |   ReturnStmt ';' 
             |    '{'  Stmt * '}'

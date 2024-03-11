@@ -22,7 +22,8 @@ void typeAdd(AST_node* node){
     case AST_Divide:
     case AST_Assign:
     case AST_None:
-        node->op_type = node->left->op_type;
+        if(node->left )
+            node->op_type = node->left->op_type;
         break;
     case AST_Eq:
     case AST_Neq:
@@ -32,6 +33,7 @@ void typeAdd(AST_node* node){
     case AST_rt:
     case AST_val:
     case AST_Num:
+    case AST_Func:
         node->op_type = new Type(TY_int);
         break;
     case AST_Ref:
@@ -54,6 +56,8 @@ void typeAdd(vector<AST_node*>& nodes){
         return ;
     }
     for(auto node : nodes){
+        
         typeAdd(node);
     }
+
 }

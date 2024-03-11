@@ -37,11 +37,11 @@ void Xcc::compile(){
     Parser parser;
     parser.tokens = vector<Token>(tokenizer.tokens);
     // cout << "parser !"  << parser.tokens.size() << endl;
-    Function* func = parser.parse();
+    vector<Function*> funcs = parser.parse();
     // parser.parserDisplay(func->stmts[0],0);
     // cout << "parser success !" << endl;
     Codegen codegen;
-    codegen.func = func; 
+    codegen.funcs = vector<Function*>(funcs); 
     codegen.codegen("test.s");
 
     // cout << "codegen success !" << endl;
