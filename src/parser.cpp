@@ -38,9 +38,10 @@ Function* Parser::parserFunction(){
 
     cur_table = (SymTable*)&(func->sym_table);
     // skip(Tok_lcul);
-    while(!match(Tok_eof))
+    while(!match(Tok_eof)){
         func->stmts = parserStmt();
-        
+        typeAdd(func->stmts);
+    } 
     // skip(Tok_rcul);
     return func;
 }
@@ -75,10 +76,10 @@ vector<AST_node*> Parser::parserStmt(int times ){
             skip(Tok_rbak);
             node->then = parserStmt(1);
 
-            cout << node->then.size() << endl;
+            // cout << node->then.size() << endl;
             if(match(Tok_else)){
                 cur ++ ;
-                node->els = parserStmt(1);
+                node->els = parserStmt(1);//之后后面紧跟的域才属于else的部分 
             }
             node->type = AST_If;
         } else if(match(Tok_for)){
@@ -166,17 +167,81 @@ AST_node* Parser::parserCompareExpr(){
     }
     return node;
 }
-
+AST_type last_op = AST_Add;
 AST_node *Parser::parserAddMinsExpr()
 {
     LOG("AddMinsExpr\n");
     AST_node *node = new AST_node;
     node->left = parserMulDivExpr();
-    if (match(Tok_plus) || match(Tok_minus))
+    if (match(Tok_plus) )
     {
-        node->type = match(Tok_plus) ? AST_Add : AST_Mins;
+        node->type = last_op == AST_Add ? AST_Add : AST_Mins; 
         cur++;
+        last_op = AST_Add;
         node->right = parserAddMinsExpr();
+
+        typeAdd(node);
+        
+        if(node->left->op_type->ty == TY_int && node->right->op_type->ty == TY_int ){
+            return node;
+        }
+
+        if(!node->left->op_type->base && node->right->op_type->base){
+            AST_node *temp = node->left;
+            node->left = node->right;
+            node->right = temp;
+        }
+
+        AST_node* new_right = new AST_node();
+        new_right->type = AST_Multiply;
+
+        AST_node* num = new AST_node();
+        num->type = AST_Num;
+        num->val = 8;
+
+        new_right->left = num;
+        new_right->right = node->right;
+        node->right = new_right;
+
+    }else if(match(Tok_minus)){
+        node->type =  last_op == AST_Add ? AST_Mins : AST_Add; 
+        cur++;
+        last_op = AST_Mins;
+        node->right = parserAddMinsExpr();
+        typeAdd(node);
+        //num-num
+        if(node->left->op_type->ty == TY_int && node->right->op_type->ty == TY_int ){
+            return node;
+        }
+        // ptr - num
+        if (node->left->op_type->base && node->right->op_type->ty == TY_int) {
+            AST_node* new_right = new AST_node();
+            new_right->type = AST_Multiply;
+
+            AST_node* num = new AST_node();
+            num->type = AST_Num;
+            num->val = 8;
+
+            new_right->left = num;
+            new_right->right = node->right;
+            node->right = new_right;
+            typeAdd(node);
+            return node;
+        }
+        //ptr-ptr
+        if (node->left->op_type->base && node->right->op_type->base) {
+            AST_node* new_right = new AST_node();
+            new_right->type = AST_Divide;
+
+            AST_node* num = new AST_node();
+            num->type = AST_Num;
+            num->val = 8;
+
+            new_right->left = node;
+            new_right->right = num;
+            node = new_right;
+            return node;
+        }
     }
     return node;
 }
@@ -188,8 +253,12 @@ AST_node *Parser::parserMulDivExpr()
     node->left = parserUnaryExpr();
     if (match(Tok_mul) || match(Tok_div))
     {
-        node->type = match(Tok_mul) ? AST_Multiply : AST_Divide;
+        if(last_op == AST_Divide )
+            node->type = match(Tok_mul) ? AST_Divide : AST_Divide;
+        else    
+            node->type = match(Tok_mul) ? AST_Multiply : AST_Divide;
         cur++;
+        last_op = AST_Divide; 
         node->right = parserMulDivExpr();
     }
     return node;
@@ -249,7 +318,7 @@ AST_node *Parser::parserPrimary()
         node->name = tokens[cur].value;
         node->type = AST_val;
         if(!cur_table->get(node->name,node->val)){
-            cur_table->add(TY_int,tokens[cur].value);
+            cur_table->add(Type(TY_int),tokens[cur].value);
             cur_table->get(node->name,node->val);
             // ERROR("variable [%s] not defined \n",node->name.c_str());
         }

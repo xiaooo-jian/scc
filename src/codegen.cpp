@@ -172,7 +172,7 @@ void Codegen::codegenExpr(AST_node *node)
         return;
     case AST_Ref:
         codegenExpr(node->left);
-        cout << "here"<< endl;
+        // cout << "here"<< endl;
         outFile << "\tmov (%rax), %rax\n";
         
         return;

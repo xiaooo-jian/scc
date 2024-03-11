@@ -59,6 +59,26 @@ struct Token{
 };
 
 
+enum TypeKind
+{
+    TY_void,
+    TY_char,
+    TY_int,
+    TY_point
+};
+struct Type{
+    TypeKind ty;
+    Type* base;
+    Type(){
+
+    }
+    Type(TypeKind ty,Type* base = nullptr){
+        this->ty = ty;
+        this->base = base;
+    }
+};
+
+
 enum AST_type{
     AST_None,
     AST_Primary,
@@ -99,6 +119,9 @@ struct AST_node{
     vector<AST_node*> els;
 
     vector<AST_node*> childs;
+
+    Type* op_type;
+
     AST_node(const AST_node& node){
         this->left = node.left;
         this->right = node.right;
@@ -107,8 +130,9 @@ struct AST_node{
         this->name = node.name;
         this->childs = vector<AST_node*>(node.childs);
         this->cond = node.cond;
-        this->then = node.then;
-        this->els = node.els;
+        this->then = vector<AST_node*>(node.then);
+        this->els = vector<AST_node*>(node.els);
+        this->op_type = op_type;
     };
     AST_node(){
         val = 0;
@@ -120,15 +144,8 @@ struct AST_node{
 };
 
 
-
-
-enum Type
-{
-    TY_void,
-    TY_char,
-    TY_int,
-    TY_point
-};
+void typeAdd(vector<AST_node*>& nodes);
+void typeAdd(AST_node* node);
 
 
 // #define __DEBUG

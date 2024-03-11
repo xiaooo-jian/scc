@@ -39,10 +39,10 @@ void Xcc::compile(){
     // cout << "parser !"  << parser.tokens.size() << endl;
     Function* func = parser.parse();
     // parser.parserDisplay(func->stmts[0],0);
-    // cout << "parser success !" << endl;
+    cout << "parser success !" << endl;
     Codegen codegen;
     codegen.func = func; 
     codegen.codegen("test.s");
 
-    // cout << "codegen success !" << endl;
+    cout << "codegen success !" << endl;
 }
