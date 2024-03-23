@@ -4,7 +4,7 @@ Stmt        =>  ExprStmt ';'
             |   ReturnStmt ';' 
             |    '{'  Stmt * '}'
             |   ';'
-            |   DeclarStmt
+            |   DeclarStmt ';'
             |   'for' '(' ExprStmt ';'ExprStmt ';' Stmt ')' stmts
             |   'if' '(' Expression ')' Stmt ('else' Stmt)? 
             |   'while' '(' Expression ')' Stmt

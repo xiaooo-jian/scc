@@ -5,26 +5,30 @@
 // }
 
 // 偏移量计算怎么感觉可以放到语法分析一次性做完
-int Codegen::align(int n, int align) {
-  return (n + align - 1) / align * align;
+int Codegen::align(int n, int align)
+{
+    return (n + align - 1) / align * align;
 }
 
-void Codegen::iden_offset(){
+void Codegen::iden_offset()
+{
 
-    for(auto& f : funcs){
+    for (auto &f : funcs)
+    {
         int offset = 0;
-        for(auto& val : f->sym_table.table){
+        for (auto &val : f->sym_table.table)
+        {
             offset += 8;
             val.second.offset = -offset;
         }
         f->stack_size = align(offset, 16);
     }
-
 }
 
-static int jump_count() {
-  static int i = 1;
-  return i++;
+static int jump_count()
+{
+    static int i = 1;
+    return i++;
 }
 
 void Codegen::codegen(string filename)
@@ -36,20 +40,21 @@ void Codegen::codegen(string filename)
         return;
     }
 
-    iden_offset();
+    iden_offset(); // 偏移量计算，为变量腾出空间
 
-    
-    for(auto f : funcs){
+    for (auto f : funcs)
+    {
         func = f;
-        codegen_init();
+        codegen_init(); // 汇编头
         int n = f->params.size();
-        for(int i = 0 ; i < n ;i++){
-            outFile << "\tmov " << args_reg[i] << ", " << f->sym_table.table[f->params[i]->left->name].offset << "(%rbp)\n"; 
+        for (int i = 0; i < n; i++) // 从寄存器中拿出形参的值
+        {
+            outFile << "\tmov " << args_reg[i] << ", " << f->sym_table.table[f->params[i]->left->name].offset << "(%rbp)\n";
         }
-            
-        codegenStmt(f->stmts);
+
+        codegenStmt(f->stmts); // 逐条读取语句
         assert(depth == 0);
-        codegen_end();
+        codegen_end(); // 汇编尾
     }
     outFile.close();
 }
@@ -57,12 +62,11 @@ void Codegen::codegen(string filename)
 void Codegen::codegen_init()
 {
     outFile << "\t.globl " << func->name << "\n";
-    outFile << func->name <<  ":\n";
+    outFile << func->name << ":\n";
     // stack
     outFile << "\tpush %rbp\n";
     outFile << "\tmov %rsp, %rbp\n";
     outFile << "\tsub $" << func->stack_size << ", %rsp\n";
-
 }
 
 void Codegen::codegen_end()
@@ -85,89 +89,96 @@ void Codegen::pop(string arg)
     depth--;
 }
 
-void Codegen::codegenStmt(vector<AST_node*> stmts){
-    for(auto root: stmts){
+void Codegen::codegenStmt(vector<AST_node *> stmts)
+{
+    for (auto root : stmts)
+    {
+        switch (root->type) // 语句解析
+        {
+        case AST_Expr:
+            codegenExpr(root->left);
+            break;
+        case AST_Return:
+            root->type = AST_Expr;
+            codegenExpr(root->left);
+            outFile << "\tjmp .L.return." << func->name << endl;
+            break;
+        case AST_Block:
+            if (root->childs.size() == 0)
+                break;
+            codegenStmt(root->childs);
+            break;
+        case AST_If:
+        {
 
-        switch(root->type){
-            case AST_Expr:
-                codegenExpr(root->left);
-                break;
-            case AST_Return:
-                root->type = AST_Expr;
-                codegenExpr(root->left);
-                outFile << "\tjmp .L.return." << func->name << endl;
-                break ;
-            case AST_Block:
-                if(root->childs.size() == 0) 
-                    break;
-                codegenStmt(root->childs);
-                break;
-            case AST_If:{
-
-                int c = jump_count();
-                codegenExpr(root->cond->left);            
-                outFile << "\tcmp $0, %rax\n";
-                outFile << "\tje .L.if.else." << c << endl;
-                codegenStmt(root->then);
-                outFile << "\tjmp .L.if.end." << c << endl;
-                outFile << "\n.L.if.else." << c << ":\n";
-                if(!root->els.empty()){
-                    codegenStmt(root->els);
-                }
-                outFile << "\n.L.if.end." << c << ":\n";
-                break;
+            int c = jump_count();
+            codegenExpr(root->cond->left);
+            outFile << "\tcmp $0, %rax\n";
+            outFile << "\tje .L.if.else." << c << endl;
+            codegenStmt(root->then);
+            outFile << "\tjmp .L.if.end." << c << endl;
+            outFile << "\n.L.if.else." << c << ":\n";
+            if (!root->els.empty())
+            {
+                codegenStmt(root->els);
             }
-            case AST_For:{
-                int c = jump_count();
-                if(root->init.empty())
-                    codegenStmt(root->init);
-                outFile << ".L.begin." << c << ":\n";
-                if(root->cond){
-                    codegenExpr(root->cond->left);
-                    outFile << "\tcmp $0, %rax\n";
-                    outFile << "\tje .L.end." << c << endl;
-                }
-                codegenStmt(root->then);
-                if(root->expr){
-                    codegenExpr(root->expr);
-                }
-                outFile << "\tjmp .L.begin." << c << endl;
-                outFile << "\n.L.end." << c << ":\n";
-                break;
-            }
-            case AST_Assign:
-                codegenExpr(root);
-                break;
-            default:
-                break;
+            outFile << "\n.L.if.end." << c << ":\n";
+            break;
         }
-
-    }
-
-}
-
-void Codegen::codegenAddr(AST_node* node){
-    // cout << node->type << endl;
-    switch (node->type) {
-        
-        case AST_val:
-            outFile << "\tlea " << func->get_offset(node->name) << "(%rbp), %rax\n";
+        case AST_For:
+        {
+            int c = jump_count();
+            if (root->init.empty())
+                codegenStmt(root->init);
+            outFile << ".L.begin." << c << ":\n";
+            if (root->cond)
+            {
+                codegenExpr(root->cond->left);
+                outFile << "\tcmp $0, %rax\n";
+                outFile << "\tje .L.end." << c << endl;
+            }
+            codegenStmt(root->then);
+            if (root->expr)
+            {
+                codegenExpr(root->expr);
+            }
+            outFile << "\tjmp .L.begin." << c << endl;
+            outFile << "\n.L.end." << c << ":\n";
             break;
-        case AST_Ref:
-            codegenExpr(node->left);
+        }
+        case AST_Assign:
+            codegenExpr(root);
             break;
-        case AST_None:
-            codegenAddr(node->left);
         default:
             break;
-    }  
+        }
+    }
 }
 
-void Codegen::codegenExpr(AST_node *node)
+void Codegen::codegenAddr(AST_node *node)
+{
+    // cout << node->type << endl;
+    switch (node->type) // 地址解析，多用于拿出地址的值
+    {
+
+    case AST_val:
+        outFile << "\tlea " << func->get_offset(node->name) << "(%rbp), %rax\n";
+        break;
+    case AST_Ref:
+        codegenExpr(node->left);
+        break;
+    case AST_None:
+        codegenAddr(node->left);
+    default:
+        break;
+    }
+}
+
+void Codegen::codegenExpr(AST_node *node) // 表达式解析
 {
     // if(node == NULL) return;
-            // cout <<node->type<< endl;
-    switch (node->type)
+    // cout <<node->type<< endl;
+    switch (node->type) // 前半部分存在后续的需要遍历的内容
     {
     case AST_Num:
         outFile << "\tmov $" << node->val << ", %rax\n";
@@ -176,18 +187,21 @@ void Codegen::codegenExpr(AST_node *node)
         codegenAddr(node);
         outFile << "\tmov (%rax), %rax\n";
         return;
-    case AST_Func:{
+    case AST_Func:
+    {
         int num = 0;
-        for(auto arg : node->init){
+        for (auto arg : node->init)
+        {
             codegenExpr(arg);
             push();
-            num ++;
+            num++;
         }
-        for(int i = num-1 ; i >= 0 ; i--)
+        for (int i = num - 1; i >= 0; i--)
             pop(args_reg[i]);
         outFile << "\tmov $0, %rax\n";
         outFile << "\tcall " << node->name << "\n";
-        return ;}
+        return;
+    }
     case AST_Assign:
         codegenAddr(node->left);
         push();
@@ -200,32 +214,30 @@ void Codegen::codegenExpr(AST_node *node)
         codegenExpr(node->left);
         // cout << "here"<< endl;
         outFile << "\tmov (%rax), %rax\n";
-        
+
         return;
     case AST_Addr:
         // codegenAddr(node);
         codegenAddr(node->left);
-        
+
         return;
 
     default:
         LOG("nothing...");
     }
-    
-    if(node->right){
+
+    if (node->right)
+    {
         codegenExpr(node->right);
-        if(node->type != AST_None )
+        if (node->type != AST_None)
             push();
     }
-    if(node->left){
+    if (node->left)
+    {
         codegenExpr(node->left);
-        if(node->type != AST_None )
+        if (node->type != AST_None)
             pop("%rdi");
     }
-
-
-
-
 
     switch (node->type)
     {
@@ -272,13 +284,12 @@ void Codegen::codegenExpr(AST_node *node)
         outFile << "\tsetl %al\n";
         outFile << "\tmovzb %al, %rax\n";
         break;
-    
+
     case AST_None:
     case AST_Expr:
         break;
     default:
-        ERROR("except %d\n",node->type);
+        ERROR("except %d\n", node->type);
         // cout << "error in codegenexpr\n";
     }
 }
-

@@ -1,9 +1,10 @@
 #include <common.h>
 
-void typeAdd(AST_node* node){
+void typeAdd(AST_node *node)
+{
     if (!node || node->op_type)
         return;
-    
+
     typeAdd(node->left);
     typeAdd(node->right);
     typeAdd(node->init);
@@ -22,7 +23,7 @@ void typeAdd(AST_node* node){
     case AST_Divide:
     case AST_Assign:
     case AST_None:
-        if(node->left )
+        if (node->left)
             node->op_type = node->left->op_type;
         break;
     case AST_Eq:
@@ -37,27 +38,29 @@ void typeAdd(AST_node* node){
         node->op_type = new Type(TY_int);
         break;
     case AST_Ref:
-        if(node->left->op_type->ty == TY_point )
+        if (node->left->op_type->ty == TY_point)
             node->op_type = node->left->op_type->base;
-        else    
+        else
             node->op_type = new Type(TY_int);
         break;
     case AST_Addr:
-        node->op_type = new Type(TY_point,node->left->op_type);
+        node->op_type = new Type(TY_point, node->left->op_type);
         break;
     default:
         break;
     }
 }
 
-void typeAdd(vector<AST_node*>& nodes){
-    
-    if( nodes.size() == 0){
-        return ;
+void typeAdd(vector<AST_node *> &nodes)
+{
+
+    if (nodes.size() == 0)
+    {
+        return;
     }
-    for(auto node : nodes){
-        
+    for (auto node : nodes)
+    {
+
         typeAdd(node);
     }
-
 }

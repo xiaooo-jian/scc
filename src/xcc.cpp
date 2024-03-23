@@ -1,10 +1,10 @@
 #include <common.h>
 #include <xcc.h>
 
-
-
-void Xcc::load(string file_name){
-    if(file_name != "./test/print"){
+void Xcc::load(string file_name)
+{
+    if (file_name != "./test/print")
+    {
         src = file_name;
         return;
     }
@@ -12,7 +12,7 @@ void Xcc::load(string file_name){
     fin.open(file_name, ios::in);
     if (!fin.is_open())
     {
-        cout << file_name << " open filded. " << fin.bad() <<  endl;
+        cout << file_name << " open filded. " << fin.bad() << endl;
         exit(-1);
     }
 
@@ -26,22 +26,23 @@ void Xcc::load(string file_name){
     fin.close();
 }
 
-void Xcc::compile(){
-                   
+void Xcc::compile()
+{
+
     Tokenizer tokenizer;
     tokenizer.tokenize(src);
-    
+
     tokenizer.token_display();
     // cout << "tokenizer success !" << endl;
 
     Parser parser;
     parser.tokens = vector<Token>(tokenizer.tokens);
     // cout << "parser !"  << parser.tokens.size() << endl;
-    vector<Function*> funcs = parser.parse();
+    vector<Function *> funcs = parser.parse();
     // parser.parserDisplay(func->stmts[0],0);
     // cout << "parser success !" << endl;
     Codegen codegen;
-    codegen.funcs = vector<Function*>(funcs); 
+    codegen.funcs = vector<Function *>(funcs);
     codegen.codegen("test.s");
 
     // cout << "codegen success !" << endl;

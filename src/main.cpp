@@ -7,12 +7,9 @@
 #include <xcc.h>
 using namespace std;
 
-
-
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     Xcc xcc;
     xcc.load(argv[1]);
     xcc.compile();
-
 }

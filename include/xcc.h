@@ -4,8 +4,8 @@
 #include <codegen.h>
 #include <symtable.h>
 
-
-class Xcc{
+class Xcc
+{
 public:
     Xcc(){};
     ~Xcc(){};
@@ -16,5 +16,4 @@ public:
 
     Tokenizer tokenizer;
     Parser parser;
-
 };
